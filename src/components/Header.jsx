@@ -23,9 +23,14 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-slate-200">
       <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
-        
         {/* BRAND */}
         <Link to="/" className="flex items-center gap-2">
+          <img
+            src="/racemaster.png"
+            alt="RaceMaster 360"
+            className="h-15 w-20 object-cover rounded-3xl"
+          />
+
           <span className="text-lg font-bold tracking-tight">
             RaceMaster 360
           </span>
