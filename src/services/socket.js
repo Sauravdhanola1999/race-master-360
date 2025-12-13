@@ -1,15 +1,16 @@
 import { io } from "socket.io-client";
 
-const SOCKET_URL = import.meta.env.VITE_WSE_BASE_URL;
+const SOCKET_URL = import.meta.env.VITE_WS_BASE;
+
 
 let socket = null;
 
 export function initSocket(token) {
   if (socket) return socket;
 
-  socket = io(SOCKET_URL, {
+ socket = io(SOCKET_URL, {
   transports: ["websocket", "polling"],
-  auth: { token },  // token can be empty for public users
+  auth: token ? { token } : {}, // ✅ FIX
   reconnection: true,
 });
 

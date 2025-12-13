@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { initSocket } from "../../services/socket";
+import api from "../../services/api";
+
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -28,25 +30,37 @@ function LiveBadge() {
 export default function LiveLeaderboard() {
   const { eventId } = useParams();
   const [board, setBoard] = useState([]);
+useEffect(() => {
+  let socket;
 
-  useEffect(() => {
-    const token = localStorage.getItem("token") || "";
-    const socket = initSocket(token);
+  async function init() {
+    try {
+      const res = await api.get(`/results/leaderboard/${eventId}`);
+      setBoard(res.data.data);
+    } catch (err) {
+      console.error("Failed to fetch leaderboard:", err);
+    }
+    const token = localStorage.getItem("token");
+    socket = initSocket(token);
 
-    socket.emit("joinLeaderboard", { eventId });
+    socket.emit("joinLeaderboard", { eventId: String(eventId) });
 
-    const handleUpdate = (payload) => {
+    socket.on("leaderboard:update", (payload) => {
       console.log("🔄 Leaderboard Update:", payload);
       setBoard(payload);
-    };
+    });
+  }
 
-    socket.on("leaderboard:update", handleUpdate);
+  init();
 
-    return () => {
-      socket.emit("leaveLeaderboard", { eventId });
-      socket.off("leaderboard:update", handleUpdate);
-    };
-  }, [eventId]);
+  return () => {
+    if (socket) {
+      socket.emit("leaveLeaderboard", { eventId: String(eventId) });
+      socket.off("leaderboard:update");
+    }
+  };
+}, [eventId]);
+
 
   const top3 = board.slice(0, 3);
 
