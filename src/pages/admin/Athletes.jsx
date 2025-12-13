@@ -22,6 +22,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Athletes() {
   const [athletes, setAthletes] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [heats, setHeats] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({
     name: "",
@@ -30,6 +32,9 @@ export default function Athletes() {
     gender: "M",
     personalBest: "",
     seasonBest: "",
+    eventId: "",
+    heatId: "",
+    lane: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -41,7 +46,30 @@ export default function Athletes() {
 
   useEffect(() => {
     fetchAll();
+    loadEvents();
   }, []);
+
+  async function loadEvents() {
+    try {
+      const res = await api.get("/events");
+      setEvents(res.data.data || res.data);
+    } catch (err) {
+      console.error("Failed to load events:", err);
+    }
+  }
+
+  async function loadHeatsForEvent(eventId) {
+    setForm({ ...form, eventId, heatId: "" });
+    setHeats([]);
+    if (!eventId) return;
+
+    try {
+      const res = await api.get(`/heats/event/${eventId}`);
+      setHeats(res.data.data || res.data);
+    } catch (err) {
+      console.error("Failed to load heats:", err);
+    }
+  }
 
   async function fetchAll() {
     try {
@@ -112,6 +140,16 @@ export default function Athletes() {
       }
     }
 
+    // Event and Heat validation (required for creation only)
+    if (!isEdit) {
+      if (!form.eventId || form.eventId === "") {
+        newErrors.eventId = "Event is required";
+      }
+      if (!form.heatId || form.heatId === "") {
+        newErrors.heatId = "Heat is required";
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
@@ -124,9 +162,13 @@ export default function Athletes() {
       gender: "M",
       personalBest: "",
       seasonBest: "",
+      eventId: "",
+      heatId: "",
+      lane: "",
     });
     setErrors({});
     setEditingId(null);
+    setHeats([]);
   }
 
   function handleEdit(athlete) {
@@ -138,8 +180,12 @@ export default function Athletes() {
       gender: athlete.gender || "M",
       personalBest: athlete.personalBest?.toString() || "",
       seasonBest: athlete.seasonBest?.toString() || "",
+      eventId: "",
+      heatId: "",
+      lane: "",
     });
     setErrors({});
+    setHeats([]);
   }
 
   function handleCancel() {
@@ -158,6 +204,8 @@ export default function Athletes() {
       country: form.country.toUpperCase().slice(0, 3),
       age: Number(form.age),
       gender: form.gender,
+      eventId: Number(form.eventId),
+      heatId: Number(form.heatId),
     };
 
     if (form.personalBest && form.personalBest !== "") {
@@ -166,12 +214,15 @@ export default function Athletes() {
     if (form.seasonBest && form.seasonBest !== "") {
       payload.seasonBest = parseFloat(form.seasonBest);
     }
+    if (form.lane && form.lane !== "") {
+      payload.lane = Number(form.lane);
+    }
 
     try {
       await api.post("/athletes/create", payload);
       setPopup({
         open: true,
-        message: "Athlete added successfully",
+        message: "Athlete added successfully and assigned to event/heat",
         type: "success",
       });
       resetForm();
@@ -462,6 +513,100 @@ export default function Athletes() {
                 </p>
               )}
             </div>
+
+            {/* Event and Heat fields - only shown when creating (not editing) */}
+            {!editingId && (
+              <>
+                <div>
+                  <label className="text-sm font-medium text-slate-300">
+                    Event <span className="text-red-400">*</span>
+                  </label>
+                  <Select
+                    value={form.eventId}
+                    onValueChange={(val) => {
+                      loadHeatsForEvent(val);
+                      if (errors.eventId) setErrors({ ...errors, eventId: "" });
+                    }}
+                  >
+                    <SelectTrigger
+                      className={`bg-slate-700 border-slate-600 text-white focus:border-green-500 focus:ring-green-500 ${
+                        errors.eventId ? "border-red-500" : ""
+                      }`}
+                    >
+                      <SelectValue placeholder="Select Event" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      {events.map((ev) => (
+                        <SelectItem
+                          key={ev.id}
+                          value={String(ev.id)}
+                          className="text-white hover:bg-slate-700"
+                        >
+                          {ev.eventName} ({ev.category})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.eventId && (
+                    <p className="text-xs text-red-400 mt-1">{errors.eventId}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-slate-300">
+                    Heat <span className="text-red-400">*</span>
+                  </label>
+                  <Select
+                    value={form.heatId}
+                    onValueChange={(val) => {
+                      setForm({ ...form, heatId: val });
+                      if (errors.heatId) setErrors({ ...errors, heatId: "" });
+                    }}
+                    disabled={!form.eventId || heats.length === 0}
+                  >
+                    <SelectTrigger
+                      className={`bg-slate-700 border-slate-600 text-white focus:border-green-500 focus:ring-green-500 ${
+                        errors.heatId ? "border-red-500" : ""
+                      }`}
+                    >
+                      <SelectValue placeholder={form.eventId ? "Select Heat" : "Select Event first"} />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      {heats.map((h) => (
+                        <SelectItem
+                          key={h.id}
+                          value={String(h.id)}
+                          className="text-white hover:bg-slate-700"
+                        >
+                          Heat {h.heatNumber} ({h.round})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.heatId && (
+                    <p className="text-xs text-red-400 mt-1">{errors.heatId}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-slate-300">Lane (Optional)</label>
+                  <Input
+                    type="number"
+                    placeholder="1-8"
+                    min="1"
+                    max="8"
+                    value={form.lane}
+                    onChange={(e) => {
+                      setForm({ ...form, lane: e.target.value });
+                    }}
+                    className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus:border-green-500 focus:ring-green-500"
+                  />
+                  <p className="text-xs text-slate-400 mt-1">
+                    Optional: Lane assignment for the heat
+                  </p>
+                </div>
+              </>
+            )}
 
             <div className="flex items-end gap-3 md:col-span-2 lg:col-span-3 pt-2">
               <Button
