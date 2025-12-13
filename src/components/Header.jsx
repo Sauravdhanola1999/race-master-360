@@ -73,7 +73,7 @@ export default function Header() {
                 </Button>
               </DropdownMenuTrigger>
 
-              <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuContent align="end" className="w-40 text-white">
                 <DropdownMenuItem onClick={() => navigate("/admin")}>
                   Dashboard
                 </DropdownMenuItem>
