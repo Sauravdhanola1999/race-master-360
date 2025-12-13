@@ -1,9 +1,14 @@
 import React from "react";
 import { Link, Outlet } from "react-router-dom";
+import crazyPicture from "../../assets/crazypicture.jpg";
 
 export default function AdminLayout(){
   return (
-    <div className="bg-white rounded shadow p-4">
+    <div className="bg-white rounded shadow p-4"
+    style={{
+      backgroundImage: `url(${crazyPicture})`,
+    }}
+    >
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold">Admin Panel</h2>
         <div>
@@ -16,3 +21,5 @@ export default function AdminLayout(){
     </div>
   );
 }
+
+

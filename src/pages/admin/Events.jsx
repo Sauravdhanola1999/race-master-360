@@ -31,7 +31,7 @@ export default function Events() {
 
   async function create(e) {
     e.preventDefault();
-    await api.post("/events", form);
+    await api.post("/events/create", form);
     setForm({ eventName: "", category: "Men", distance: 100 });
     fetchAll();
   }

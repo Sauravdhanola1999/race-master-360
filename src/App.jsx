@@ -14,9 +14,13 @@ import Login from "./pages/Login";
 
 export default function App(){
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen"
+    style={{
+      backgroundImage: "url(/crazypicture.jpg)",
+    }}
+    >
       <Header />
-      <div className="p-4 max-w-6xl mx-auto">
+      <div className="">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/event/:id" element={<EventDetails />} />

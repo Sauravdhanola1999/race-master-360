@@ -5,11 +5,14 @@ import App from "./App";
 import { AuthProvider } from "./auth/AuthProvider";
 import "./index.css";
 
+import bigImage from "./assets/healthy-lifestyle-running-outdoors.jpg";
+
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <AuthProvider>
       <BrowserRouter>
-        <App />
+        <App bgImage={bigImage} />
       </BrowserRouter>
     </AuthProvider>
   </React.StrictMode>
