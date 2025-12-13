@@ -24,47 +24,45 @@ export default function Header() {
 
   const navBtn = (path) =>
     cn(
-      "px-3 py-1.5 rounded-md text-sm font-medium transition",
-      location.pathname === path
-        ? "bg-indigo-600 text-white"
-        : "text-slate-700 hover:bg-indigo-50 hover:text-indigo-700"
+      "px-3 py-1.5 rounded-md text-sm font-medium transition text-white",
+      location.pathname === path ? "bg-indigo-600" : "hover:bg-white/10"
     );
 
   return (
     // <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-200">
-    <header className="sticky top-0 z-50 bg-black border-b border-white/20 ">
-
-      <div className="max-w-6xl  px-4 py-4 flex items-center justify-between ">
-        {/* BRAND */}
-        <Link to="/" className="flex items-center gap-2">
+    <header className="sticky top-0 z-50 bg-black border-b border-white/20">
+      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center">
+        {/* ================= LEFT : BRAND ================= */}
+        <Link to="/" className="flex items-center gap-2 shrink-0">
           <img
             src="/racemaster.png"
             alt="RaceMaster 360"
-            className="h-10 w-10 object-cover rounded-2xl"
+            className="h-9 w-9 rounded-xl object-cover"
           />
           <span className="text-lg text-white font-bold tracking-tight">
             RaceMaster 360
           </span>
         </Link>
-         
 
-         <div className="mr-[7px] flex item-center justify-between">
-         <nav className="flex items-center gap-2 text-white">
+        {/* ================= CENTER : NAV LINKS ================= */}
+        <nav className="flex-1 flex justify-center items-center gap-6">
           <Link to="/" className={navBtn("/")}>
-            <span className="text-white">Home</span>
+            Home
           </Link>
 
           <Link to="/live/1" className={navBtn("/live/1")}>
-           <span className="text-white">Live</span> 
+            Live
           </Link>
+        </nav>
 
-          {/* ADMIN */}
+        {/* ================= RIGHT : ADMIN ================= */}
+        <div className="flex justify-center">
           {user && user.role === "admin" ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   size="sm"
-                  className="ml-2 text-white bg-indigo-600 hover:bg-indigo-700 text-white flex items-center"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white flex items-center"
                 >
                   <Avatar className="h-6 w-6 mr-2">
                     <AvatarImage src="/image.png" alt="Admin" />
@@ -76,7 +74,7 @@ export default function Header() {
                 </Button>
               </DropdownMenuTrigger>
 
-              <DropdownMenuContent align="end" className="w-40 ">
+              <DropdownMenuContent align="end" className="w-40">
                 <DropdownMenuItem onClick={() => navigate("/admin")}>
                   Dashboard
                 </DropdownMenuItem>
@@ -92,16 +90,13 @@ export default function Header() {
             <Link to="/login">
               <Button
                 size="sm"
-                className="ml-2 bg-indigo-600 hover:bg-indigo-700 text-white"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white"
               >
                 Admin Login
               </Button>
             </Link>
           )}
-        </nav>
-         </div>
-        {/* NAV */}
-       
+        </div>
       </div>
     </header>
   );

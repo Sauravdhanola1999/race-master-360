@@ -98,7 +98,6 @@
 import React, { useEffect, useState } from "react";
 import api from "../../services/api";
 import { Link } from "react-router-dom";
-import bgImage from "../../assets/crazypicture.jpg";
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -133,7 +132,6 @@ export default function Dashboard() {
   return (
     <div
       className="min-h-screen bg-cover bg-center bg-no-repeat p-6"
-      style={{ backgroundImage: `url(${bgImage})` }}
     >
       {/* Optional overlay for readability */}
       <div className="bg-white/80 p-6 rounded-lg">

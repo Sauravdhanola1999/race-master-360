@@ -14,11 +14,7 @@ import Login from "./pages/Login";
 
 export default function App(){
   return (
-    <div className="min-h-screen"
-    style={{
-      backgroundImage: "url(/crazypicture.jpg)",
-    }}
-    >
+    <div className="min-h-screen">
       <Header />
       <div className="">
         <Routes>
