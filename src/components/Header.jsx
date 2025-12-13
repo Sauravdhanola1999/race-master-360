@@ -31,8 +31,10 @@ export default function Header() {
     );
 
   return (
-    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-200">
-      <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
+    // <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-200">
+    <header className="sticky top-0 z-50 bg-black border-b border-white/20 ">
+
+      <div className="max-w-6xl  px-4 py-4 flex items-center justify-between ">
         {/* BRAND */}
         <Link to="/" className="flex items-center gap-2">
           <img
@@ -40,19 +42,20 @@ export default function Header() {
             alt="RaceMaster 360"
             className="h-10 w-10 object-cover rounded-2xl"
           />
-          <span className="text-lg font-bold tracking-tight">
+          <span className="text-lg text-white font-bold tracking-tight">
             RaceMaster 360
           </span>
         </Link>
+         
 
-        {/* NAV */}
-        <nav className="flex items-center gap-2">
+         <div className="mr-[7px] flex item-center justify-between">
+         <nav className="flex items-center gap-2 text-white">
           <Link to="/" className={navBtn("/")}>
-            Home
+            <span className="text-white">Home</span>
           </Link>
 
           <Link to="/live/1" className={navBtn("/live/1")}>
-            Live
+           <span className="text-white">Live</span> 
           </Link>
 
           {/* ADMIN */}
@@ -61,7 +64,7 @@ export default function Header() {
               <DropdownMenuTrigger asChild>
                 <Button
                   size="sm"
-                  className="ml-2 bg-indigo-600 hover:bg-indigo-700 text-white flex items-center"
+                  className="ml-2 text-white bg-indigo-600 hover:bg-indigo-700 text-white flex items-center"
                 >
                   <Avatar className="h-6 w-6 mr-2">
                     <AvatarImage src="/image.png" alt="Admin" />
@@ -73,7 +76,7 @@ export default function Header() {
                 </Button>
               </DropdownMenuTrigger>
 
-              <DropdownMenuContent align="end" className="w-40 text-white">
+              <DropdownMenuContent align="end" className="w-40 ">
                 <DropdownMenuItem onClick={() => navigate("/admin")}>
                   Dashboard
                 </DropdownMenuItem>
@@ -96,6 +99,9 @@ export default function Header() {
             </Link>
           )}
         </nav>
+         </div>
+        {/* NAV */}
+       
       </div>
     </header>
   );
