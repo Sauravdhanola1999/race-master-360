@@ -45,68 +45,6 @@ export default function AdminLayout() {
           </CardContent>
         </Card>
 
-        {/* ================= QUICK ACTIONS ================= */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-
-          <Card className="bg-white/80 backdrop-blur border border-slate-200 shadow-sm transition hover:shadow-md hover:-translate-y-1">
-            <CardHeader>
-              <CardTitle className="text-base">Manage Athletes</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-sm text-muted-foreground">
-                Add, edit, and manage registered athletes.
-              </p>
-              <Link to="/admin/athletes">
-                <Button
-                  size="sm"
-                  className="bg-indigo-600 hover:bg-indigo-700 transition active:scale-95"
-                >
-                  Go to Athletes
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/80 backdrop-blur border border-slate-200 shadow-sm transition hover:shadow-md hover:-translate-y-1">
-            <CardHeader>
-              <CardTitle className="text-base">Manage Events</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-sm text-muted-foreground">
-                Create events, heats, and rounds.
-              </p>
-              <Link to="/admin/events">
-                <Button
-                  size="sm"
-                  className="bg-indigo-600 hover:bg-indigo-700 transition active:scale-95"
-                >
-                  Go to Events
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/80 backdrop-blur border border-slate-200 shadow-sm transition hover:shadow-md hover:-translate-y-1">
-            <CardHeader>
-              <CardTitle className="text-base">Enter Results</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-sm text-muted-foreground">
-                Submit race results and update leaderboards.
-              </p>
-              <Link to="/admin/results">
-                <Button
-                  size="sm"
-                  className="bg-indigo-600 hover:bg-indigo-700 transition active:scale-95"
-                >
-                  Go to Results
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-        </div>
-
         {/* ================= PAGE CONTENT ================= */}
         <div className="animate-in fade-in slide-in-from-bottom-3 duration-300">
           <Outlet />

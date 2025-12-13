@@ -37,131 +37,154 @@ export default function Events() {
   }
 
   return (
-    <div className="space-y-8">
-      {/* PAGE HEADER */}
-      <div>
-        <h1 className="text-2xl font-bold">Events</h1>
-        <p className="text-sm text-muted-foreground">
-          Create and manage athletics events
-        </p>
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-white to-indigo-50">
+
+      {/* ================= BACKGROUND BLOBS ================= */}
+      <div className="pointer-events-none absolute -top-40 -left-40 h-96 w-96 rounded-full bg-indigo-200/40 blur-3xl" />
+      <div className="pointer-events-none absolute top-1/3 -right-40 h-96 w-96 rounded-full bg-purple-200/40 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-0 left-1/3 h-96 w-96 rounded-full bg-sky-200/40 blur-3xl" />
+
+      {/* ================= MOVING RUNNER ================= */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="runner-bg" />
       </div>
 
-      {/* ADD EVENT */}
-      <Card className="border border-slate-200 shadow-sm">
-        <CardHeader>
-          <CardTitle>Add Event</CardTitle>
-        </CardHeader>
+      {/* ================= PAGE CONTENT ================= */}
+      <div className="relative z-10 max-w-6xl mx-auto px-6 py-10 space-y-10">
 
-        <CardContent>
-          <form
-            onSubmit={create}
-            className="grid grid-cols-1 md:grid-cols-5 gap-4"
-          >
-            {/* Event Name */}
-            <div className="md:col-span-2">
-              <label className="text-sm font-medium">Event Name</label>
-              <Input
-                placeholder="100m Sprint"
-                value={form.eventName}
-                onChange={(e) =>
-                  setForm({ ...form, eventName: e.target.value })
-                }
-                required
-              />
-            </div>
+        {/* ================= PAGE HEADER ================= */}
+        <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+          <h1 className="text-2xl font-bold tracking-tight">Events</h1>
+          <p className="text-sm text-muted-foreground">
+            Create and manage athletics events
+          </p>
+        </div>
 
-            {/* Distance */}
-            <div>
-              <label className="text-sm font-medium">Distance (m)</label>
-              <Input
-                type="number"
-                placeholder="100"
-                value={form.distance}
-                onChange={(e) =>
-                  setForm({ ...form, distance: e.target.value })
-                }
-              />
-            </div>
+        {/* ================= ADD EVENT ================= */}
+        <Card className="bg-white/80 backdrop-blur border border-slate-200 rounded-2xl shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <CardHeader>
+            <CardTitle className="text-lg">Add Event</CardTitle>
+          </CardHeader>
 
-            {/* Category */}
-            <div>
-              <label className="text-sm font-medium">Category</label>
-              <Select
-                value={form.category}
-                onValueChange={(val) =>
-                  setForm({ ...form, category: val })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Men">Men</SelectItem>
-                  <SelectItem value="Women">Women</SelectItem>
-                  <SelectItem value="U18">U18</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Submit */}
-            <div className="flex items-end">
-              <Button className="w-full bg-indigo-600 hover:bg-indigo-700">
-                Create Event
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-
-      {/* EVENTS LIST */}
-      <Card className="border border-slate-200 shadow-sm">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Events List</CardTitle>
-          <span className="text-sm text-muted-foreground">
-            Total: {events.length}
-          </span>
-        </CardHeader>
-
-        <CardContent className="space-y-2">
-          {events.map((ev) => (
-            <div
-              key={ev.id}
-              className="
-                flex items-center justify-between
-                border rounded-lg px-4 py-3
-                hover:bg-slate-50 transition
-              "
+          <CardContent>
+            <form
+              onSubmit={create}
+              className="grid grid-cols-1 md:grid-cols-6 gap-4"
             >
-              {/* Event Info */}
+              {/* Event Name */}
+              <div className="md:col-span-3">
+                <label className="text-sm font-medium">Event Name</label>
+                <Input
+                  placeholder="100m Sprint"
+                  value={form.eventName}
+                  onChange={(e) =>
+                    setForm({ ...form, eventName: e.target.value })
+                  }
+                  required
+                />
+              </div>
+
+              {/* Distance */}
               <div>
-                <div className="font-medium">
-                  {ev.eventName}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {ev.distance}m • {ev.category}
-                </div>
+                <label className="text-sm font-medium">Distance (m)</label>
+                <Input
+                  type="number"
+                  placeholder="100"
+                  value={form.distance}
+                  onChange={(e) =>
+                    setForm({ ...form, distance: e.target.value })
+                  }
+                />
               </div>
 
-              {/* Actions */}
-              <div className="flex gap-3 text-sm">
-                <Link
-                  to={`/admin/results?eventId=${ev.id}`}
-                  className="text-indigo-600 hover:underline"
+              {/* Category */}
+              <div>
+                <label className="text-sm font-medium">Category</label>
+                <Select
+                  value={form.category}
+                  onValueChange={(val) =>
+                    setForm({ ...form, category: val })
+                  }
                 >
-                  Enter Results
-                </Link>
-
-                <Link
-                  to={`/event/${ev.id}`}
-                  className="text-slate-600 hover:underline"
-                >
-                  View Public
-                </Link>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Men">Men</SelectItem>
+                    <SelectItem value="Women">Women</SelectItem>
+                    <SelectItem value="U18">U18</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+
+              {/* Submit */}
+              <div className="flex items-end">
+                <Button className="w-full bg-indigo-600 hover:bg-indigo-700 transition active:scale-95">
+                  Create Event
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+
+        {/* ================= EVENTS LIST ================= */}
+        <Card className="bg-white/80 backdrop-blur border border-slate-200 rounded-2xl shadow-sm animate-in fade-in slide-in-from-bottom-3 duration-300">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-lg">Events List</CardTitle>
+            <span className="text-sm text-muted-foreground">
+              Total: {events.length}
+            </span>
+          </CardHeader>
+
+          <CardContent className="space-y-3">
+            {events.map((ev) => (
+              <div
+                key={ev.id}
+                className="
+                  flex items-center justify-between
+                  rounded-xl
+                  border border-slate-200
+                  px-4 py-3
+                  transition
+                  hover:bg-indigo-50
+                "
+              >
+                {/* Event Info */}
+                <div className="space-y-0.5">
+                  <div className="font-medium">{ev.eventName}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {ev.distance}m • {ev.category}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center gap-4 text-sm">
+                  <Link
+                    to={`/admin/results?eventId=${ev.id}`}
+                    className="text-indigo-600 font-medium hover:underline"
+                  >
+                    Enter Results
+                  </Link>
+
+                  <Link
+                    to={`/event/${ev.id}`}
+                    className="text-slate-600 hover:underline"
+                  >
+                    View Public
+                  </Link>
+                </div>
+              </div>
+            ))}
+
+            {events.length === 0 && (
+              <div className="text-sm text-muted-foreground text-center py-6">
+                No events created yet
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+      </div>
     </div>
   );
 }

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import api from "../../services/api";
 import CountrySelect from "../../components/CountrySelect";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/toast";
 import {
   Select,
   SelectContent,
@@ -21,7 +21,9 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+
 export default function Athletes() {
+   const { toast } = useToast();
   const [athletes, setAthletes] = useState([]);
   const [form, setForm] = useState({
     name: "",
@@ -31,6 +33,7 @@ export default function Athletes() {
     personalBest: "",
     seasonBest: "",
   });
+  
 
   useEffect(() => { fetchAll(); }, []);
 
@@ -47,6 +50,10 @@ export default function Athletes() {
     if (!payload.seasonBest) delete payload.seasonBest;
 
     await api.post("/athletes/create", payload);
+    toast({
+    title: "Athlete added successfully 🏃",
+    description: `${form.name} has been registered.`,
+  });
 
     setForm({ name:"", country:"", age:"", gender:"M", personalBest:"", seasonBest:"" });
     fetchAll();

@@ -62,6 +62,8 @@ export default function LiveLeaderboard() {
   }, [eventId]);
 
   const top3 = board.slice(0, 3);
+  const winner = top3[0];
+  const runnerUp = top3[1];
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-white to-indigo-50">
@@ -72,6 +74,27 @@ export default function LiveLeaderboard() {
 
       {/* ===== CONTENT CONTAINER ===== */}
       <div className="relative z-10 max-w-6xl mx-auto px-6 py-12 space-y-8">
+        <div className="rounded-xl border border-indigo-200 bg-indigo-50/70 backdrop-blur px-4 py-2 shadow-sm">
+          <div className="flex items-center gap-3 text-sm">
+            {/* LEFT: LIVE LABEL */}
+            <div className="flex items-center gap-2 font-medium text-indigo-900 shrink-0">
+              <span className="animate-pulse">🔴</span>
+              Live Update
+            </div>
+
+            {/* CENTER: MARQUEE (FULL WIDTH) */}
+            <div className="flex-1 overflow-hidden whitespace-nowrap text-center">
+              <div className="inline-block animate-marquee text-slate-800 font-medium">
+                🏆 Winner: {winner?.Athlete?.name || "—"}{" "}
+                {winner?.finishTime && `(${winner.finishTime.toFixed(2)}s)`}
+                &nbsp;&nbsp;|&nbsp;&nbsp; 🥈 Runner-up:{" "}
+                {runnerUp?.Athlete?.name || "—"}{" "}
+                {runnerUp?.finishTime && `(${runnerUp.finishTime.toFixed(2)}s)`}
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* ================= LIVE INFO / HERO CARD ================= */}
         <Card className="border border-indigo-200 bg-white/70 backdrop-blur shadow-md">
           <CardContent className="py-6">
@@ -105,37 +128,46 @@ export default function LiveLeaderboard() {
           </CardHeader>
 
           <CardContent>
-            <div className="grid grid-cols-3 text-center gap-4">
-              {/* Gold */}
-              <div className="bg-yellow-50 rounded-lg p-4 shadow-inner">
-                <div className="text-3xl mb-1">🥇</div>
-                <div className="font-semibold">
-                  {top3[0]?.Athlete?.name || "-"}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+              {/* 🥈 SILVER (2nd) */}
+              <div className="order-2 md:order-1 bg-white/70 backdrop-blur rounded-2xl p-5 border border-slate-200 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+                <div className="text-2xl mb-2">🥈</div>
+                <div className="text-sm uppercase tracking-wide text-slate-500">
+                  2nd Place
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  {top3[0]?.finishTime?.toFixed(2) || "-"} sec
+                <div className="font-semibold mt-1">
+                  {top3[1]?.Athlete?.name || "—"}
                 </div>
-              </div>
-
-              {/* Silver */}
-              <div className="bg-slate-100 rounded-lg p-4 shadow-inner">
-                <div className="text-3xl mb-1">🥈</div>
-                <div className="font-semibold">
-                  {top3[1]?.Athlete?.name || "-"}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {top3[1]?.finishTime?.toFixed(2) || "-"} sec
+                <div className="text-sm text-muted-foreground font-mono mt-1">
+                  {top3[1]?.finishTime?.toFixed(2) || "—"} s
                 </div>
               </div>
 
-              {/* Bronze */}
-              <div className="bg-orange-50 rounded-lg p-4 shadow-inner">
-                <div className="text-3xl mb-1">🥉</div>
-                <div className="font-semibold">
-                  {top3[2]?.Athlete?.name || "-"}
+              {/* 🥇 GOLD (CENTER, HIGHLIGHT) */}
+              <div className="order-1 md:order-2 bg-gradient-to-b from-yellow-100 to-yellow-50 rounded-2xl p-6 border border-yellow-300 shadow-lg scale-105">
+                <div className="text-3xl mb-2">🥇</div>
+                <div className="text-sm uppercase tracking-wide text-yellow-700">
+                  Winner
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  {top3[2]?.finishTime?.toFixed(2) || "-"} sec
+                <div className="font-bold text-lg mt-1">
+                  {top3[0]?.Athlete?.name || "—"}
+                </div>
+                <div className="text-sm font-mono text-yellow-800 mt-1">
+                  {top3[0]?.finishTime?.toFixed(2) || "—"} s
+                </div>
+              </div>
+
+              {/* 🥉 BRONZE */}
+              <div className="order-3 bg-white/70 backdrop-blur rounded-2xl p-5 border border-slate-200 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+                <div className="text-2xl mb-2">🥉</div>
+                <div className="text-sm uppercase tracking-wide text-slate-500">
+                  3rd Place
+                </div>
+                <div className="font-semibold mt-1">
+                  {top3[2]?.Athlete?.name || "—"}
+                </div>
+                <div className="text-sm text-muted-foreground font-mono mt-1">
+                  {top3[2]?.finishTime?.toFixed(2) || "—"} s
                 </div>
               </div>
             </div>
@@ -143,21 +175,22 @@ export default function LiveLeaderboard() {
         </Card>
 
         {/* ================= FULL LEADERBOARD ================= */}
-        <Card className="border border-slate-200 bg-white/80 backdrop-blur shadow-sm">
-          <CardHeader>
-            <CardTitle>Full Results</CardTitle>
+        {/* ================= FULL LEADERBOARD ================= */}
+        <Card className="border border-slate-200 bg-white/80 backdrop-blur rounded-2xl shadow-sm">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg">Full Results</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Complete rankings sorted by finish time (fastest first)
+              Rankings sorted by fastest finish time
             </p>
           </CardHeader>
 
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
+            <div className="relative overflow-hidden rounded-b-2xl">
               <Table>
-                {/* STICKY HEADER */}
-                <TableHeader className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b">
+                {/* ===== STICKY HEADER ===== */}
+                <TableHeader className="sticky top-0 z-10 bg-white/95 backdrop-blur border-b">
                   <TableRow>
-                    <TableHead className="w-24">Pos</TableHead>
+                    <TableHead className="w-20 text-center">Pos</TableHead>
                     <TableHead>Athlete</TableHead>
                     <TableHead className="text-right">Finish (s)</TableHead>
                     <TableHead className="text-right">Reaction (s)</TableHead>
@@ -166,6 +199,7 @@ export default function LiveLeaderboard() {
 
                 <TableBody>
                   {board.map((r, i) => {
+                    const isTop3 = r.position <= 3;
                     const medal =
                       r.position === 1
                         ? "🥇"
@@ -176,43 +210,37 @@ export default function LiveLeaderboard() {
                             : null;
 
                     return (
-                      <React.Fragment key={i}>
-                        <TableRow className="transition hover:bg-indigo-50/60">
-                          {/* POSITION */}
-                          <TableCell className="font-semibold">
-                            <div className="flex items-center gap-2">
-                              {medal && (
-                                <span className="text-lg">{medal}</span>
-                              )}
-                              <span>{r.position}</span>
-                            </div>
-                          </TableCell>
+                      <TableRow
+                        key={i}
+                        className={`
+                  transition
+                  ${isTop3 ? "bg-indigo-50/40" : ""}
+                  hover:bg-indigo-50/70
+                `}
+                      >
+                        {/* POSITION */}
+                        <TableCell className="text-center font-semibold">
+                          <div className="flex items-center justify-center gap-1">
+                            {medal && <span className="text-lg">{medal}</span>}
+                            <span>{r.position}</span>
+                          </div>
+                        </TableCell>
 
-                          {/* ATHLETE */}
-                          <TableCell className="font-medium">
-                            {r.Athlete?.name}
-                          </TableCell>
+                        {/* ATHLETE */}
+                        <TableCell className="font-medium">
+                          {r.Athlete?.name}
+                        </TableCell>
 
-                          {/* FINISH TIME */}
-                          <TableCell className="text-right font-mono">
-                            {r.finishTime ? r.finishTime.toFixed(2) : "—"}
-                          </TableCell>
+                        {/* FINISH TIME */}
+                        <TableCell className="text-right font-mono">
+                          {r.finishTime ? r.finishTime.toFixed(2) : "—"}
+                        </TableCell>
 
-                          {/* REACTION TIME */}
-                          <TableCell className="text-right font-mono text-slate-600">
-                            {r.reactionTime ? r.reactionTime.toFixed(3) : "—"}
-                          </TableCell>
-                        </TableRow>
-
-                        {/* 👇 DIVIDER AFTER TOP 3 */}
-                        {r.position === 3 && (
-                          <TableRow>
-                            <TableCell colSpan={4} className="py-2">
-                              <div className="h-px bg-slate-200 my-2" />
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </React.Fragment>
+                        {/* REACTION TIME */}
+                        <TableCell className="text-right font-mono text-slate-600">
+                          {r.reactionTime ? r.reactionTime.toFixed(3) : "—"}
+                        </TableCell>
+                      </TableRow>
                     );
                   })}
                 </TableBody>
