@@ -107,25 +107,24 @@ export default function Dashboard() {
     heats: 0,
   });
 
-  async function loadStats() {
-    try {
-      const [eventsRes, athletesRes] = await Promise.all([
-        api.get("/events"),
-        api.get("/athletes"),
-      ]);
+ async function loadStats() {
+  try {
+    const [eventsRes, athletesRes, heatsRes] = await Promise.all([
+      api.get("/events"),
+      api.get("/athletes"),
+      api.get("/heats"),
+    ]);
 
-      let heatCount = 0;
-      eventsRes.data.data?.forEach(ev => heatCount += ev.Heats?.length || 0);
-
-      setStats({
-        events: eventsRes.data.data?.length || 0,
-        athletes: athletesRes.data.data?.length || 0,
-        heats: heatCount,
-      });
-    } catch (err) {
-      console.error(err);
-    }
+    setStats({
+      events: eventsRes.data.data?.length || 0,
+      athletes: athletesRes.data.data?.length || 0,
+      heats: heatsRes.data.data?.length || 0, // ✅ FIX
+    });
+  } catch (err) {
+    console.error(err);
   }
+}
+
 
   useEffect(() => {
     loadStats();
