@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../auth/AuthProvider";
 
 import { Button } from "@/components/ui/button";
@@ -9,60 +9,67 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils"; // shadcn helper
 
 export default function Header() {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
 
   function handleLogout() {
     logout();
     navigate("/");
   }
 
+  const navBtn = (path) =>
+    cn(
+      "px-3 py-1.5 rounded-md text-sm font-medium transition",
+      location.pathname === path
+        ? "bg-indigo-600 text-white"
+        : "text-slate-700 hover:bg-indigo-50 hover:text-indigo-700"
+    );
+
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-slate-200">
+    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-200">
       <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
         {/* BRAND */}
         <Link to="/" className="flex items-center gap-2">
           <img
             src="/racemaster.png"
             alt="RaceMaster 360"
-            className="h-15 w-20 object-cover rounded-3xl"
+            className="h-10 w-10 object-cover rounded-2xl"
           />
-
           <span className="text-lg font-bold tracking-tight">
             RaceMaster 360
           </span>
         </Link>
 
         {/* NAV */}
-        <nav className="flex items-center gap-6">
-          <Link
-            to="/"
-            className="text-sm font-medium text-slate-700 hover:text-slate-900"
-          >
+        <nav className="flex items-center gap-2">
+          <Link to="/" className={navBtn("/")}>
             Home
           </Link>
 
-          <Link
-            to="/live/1"
-            className="text-sm font-medium text-slate-700 hover:text-slate-900"
-          >
+          <Link to="/live/1" className={navBtn("/live/1")}>
             Live
           </Link>
 
-          {/* AUTH SECTION */}
+          {/* ADMIN */}
           {user && user.role === "admin" ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-2">
-                  <Avatar className="h-7 w-7">
+                <Button
+                  size="sm"
+                  className="ml-2 bg-indigo-600 hover:bg-indigo-700 text-white flex items-center"
+                >
+                  <Avatar className="h-6 w-6 mr-2">
+                    <AvatarImage src="/image.png" alt="Admin" />
                     <AvatarFallback>
                       {user.email?.[0]?.toUpperCase() || "A"}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="text-sm">Admin</span>
+                  Admin
                 </Button>
               </DropdownMenuTrigger>
 
@@ -80,7 +87,10 @@ export default function Header() {
             </DropdownMenu>
           ) : (
             <Link to="/login">
-              <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">
+              <Button
+                size="sm"
+                className="ml-2 bg-indigo-600 hover:bg-indigo-700 text-white"
+              >
                 Admin Login
               </Button>
             </Link>
