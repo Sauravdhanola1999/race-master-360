@@ -3,7 +3,6 @@ import api from "../../services/api";
 import CountrySelect from "../../components/CountrySelect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/toast";
 import {
   Select,
   SelectContent,
@@ -21,9 +20,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-
 export default function Athletes() {
-   const { toast } = useToast();
   const [athletes, setAthletes] = useState([]);
   const [form, setForm] = useState({
     name: "",
@@ -33,9 +30,16 @@ export default function Athletes() {
     personalBest: "",
     seasonBest: "",
   });
-  
 
-  useEffect(() => { fetchAll(); }, []);
+  const [popup, setPopup] = useState({
+    open: false,
+    message: "",
+    type: "success", // success | error
+  });
+
+  useEffect(() => {
+    fetchAll();
+  }, []);
 
   async function fetchAll() {
     const res = await api.get("/athletes");
@@ -45,22 +49,96 @@ export default function Athletes() {
   async function create(e) {
     e.preventDefault();
 
-    const payload = { ...form, age: Number(form.age) };
+    const payload = {
+      ...form,
+      age: Number(form.age),
+      country: form.country.toUpperCase().slice(0, 3),
+    };
     if (!payload.personalBest) delete payload.personalBest;
     if (!payload.seasonBest) delete payload.seasonBest;
 
-    await api.post("/athletes/create", payload);
-    toast({
-    title: "Athlete added successfully 🏃",
-    description: `${form.name} has been registered.`,
-  });
+    try {
+      await api.post("/athletes/create", payload);
 
-    setForm({ name:"", country:"", age:"", gender:"M", personalBest:"", seasonBest:"" });
-    fetchAll();
+      setPopup({
+        open: true,
+        message: "Athlete added successfully",
+        type: "success",
+      });
+
+      setForm({
+        name: "",
+        country: "",
+        age: "",
+        gender: "M",
+        personalBest: "",
+        seasonBest: "",
+      });
+
+      fetchAll();
+
+      // auto-close popup
+      setTimeout(() => {
+        setPopup({ open: false, message: "", type: "success" });
+      }, 2000);
+    } catch (err) {
+      setPopup({
+        open: true,
+        message: "Failed to add athlete",
+        type: "error",
+      });
+    }
+  }
+
+  {
+    /* POPUP */
   }
 
   return (
     <div className="space-y-8">
+      {popup.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div
+            className={`
+        w-full max-w-sm rounded-2xl p-6 shadow-xl
+        animate-in zoom-in-95 fade-in duration-200
+        ${
+          popup.type === "success"
+            ? "bg-green-50 border border-green-300"
+            : "bg-red-50 border border-red-300"
+        }
+      `}
+          >
+            {/* HEADER */}
+            <h3
+              className={`text-lg font-semibold mb-2 text-center
+          ${popup.type === "success" ? "text-green-700" : "text-red-700"}
+        `}
+            >
+              {popup.type === "success" ? "Success" : "Error"}
+            </h3>
+
+            {/* MESSAGE */}
+            <p className="text-sm text-slate-700 text-center">
+              {popup.message}
+            </p>
+
+            {/* ACTION */}
+            <div className="mt-6 flex justify-center">
+              <Button
+                size="sm"
+                variant="outline"
+                className="px-6"
+                onClick={() =>
+                  setPopup({ open: false, message: "", type: "success" })
+                }
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* PAGE TITLE */}
       <div>
@@ -86,7 +164,7 @@ export default function Athletes() {
               <Input
                 placeholder="Enter name"
                 value={form.name}
-                onChange={(e)=>setForm({ ...form, name:e.target.value })}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
                 required
               />
             </div>
@@ -95,7 +173,7 @@ export default function Athletes() {
               <label className="text-sm font-medium">Country</label>
               <CountrySelect
                 value={form.country}
-                onChange={(val)=>setForm({ ...form, country:val })}
+                onChange={(val) => setForm({ ...form, country: val })}
               />
             </div>
 
@@ -105,7 +183,7 @@ export default function Athletes() {
                 type="number"
                 placeholder="Age"
                 value={form.age}
-                onChange={(e)=>setForm({ ...form, age:e.target.value })}
+                onChange={(e) => setForm({ ...form, age: e.target.value })}
               />
             </div>
 
@@ -113,7 +191,7 @@ export default function Athletes() {
               <label className="text-sm font-medium">Gender</label>
               <Select
                 value={form.gender}
-                onValueChange={(val)=>setForm({ ...form, gender:val })}
+                onValueChange={(val) => setForm({ ...form, gender: val })}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -166,7 +244,11 @@ export default function Athletes() {
                   <TableCell>{a.country}</TableCell>
                   <TableCell>{a.age}</TableCell>
                   <TableCell>
-                    {a.gender === "M" ? "Male" : a.gender === "F" ? "Female" : "Other"}
+                    {a.gender === "M"
+                      ? "Male"
+                      : a.gender === "F"
+                        ? "Female"
+                        : "Other"}
                   </TableCell>
                   <TableCell>{a.personalBest ?? "-"}</TableCell>
                 </TableRow>
@@ -175,8 +257,6 @@ export default function Athletes() {
           </Table>
         </CardContent>
       </Card>
-
     </div>
   );
 }
-

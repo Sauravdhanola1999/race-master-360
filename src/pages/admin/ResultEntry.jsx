@@ -27,6 +27,12 @@ export default function ResultEntry() {
     finishTime: "",
     status: "OK",
   });
+  const [popup, setPopup] = useState({
+  open: false,
+  message: "",
+  type: "success", // success | error
+});
+
 
   // Load events + athletes
   useEffect(() => {
@@ -49,9 +55,10 @@ export default function ResultEntry() {
     setHeats(res.data.data || res.data);
   }
 
-  async function submit(e) {
-    e.preventDefault();
+async function submit(e) {
+  e.preventDefault();
 
+  try {
     await api.post("/results", {
       heatId: form.heatId,
       athleteId: form.athleteId,
@@ -63,12 +70,84 @@ export default function ResultEntry() {
       status: form.status,
     });
 
-    alert("Result saved");
+    setPopup({
+      open: true,
+      message: "Result saved successfully",
+      type: "success",
+    });
+
+    // optional: reset some fields
+    setForm({
+      ...form,
+      athleteId: "",
+      lane: 1,
+      reactionTime: "",
+      finishTime: "",
+      status: "OK",
+    });
+
+    // auto close
+    setTimeout(() => {
+      setPopup({ open: false, message: "", type: "success" });
+    }, 2000);
+  } catch (err) {
+    setPopup({
+      open: true,
+      message: "Failed to save result",
+      type: "error",
+    });
   }
+}
+
 
   return (
     <div className="space-y-8">
       {/* PAGE HEADER */}
+      {popup.open && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+    <div
+      className={`
+        w-full max-w-sm rounded-2xl p-6 shadow-xl
+        animate-in zoom-in-95 fade-in duration-200
+        ${
+          popup.type === "success"
+            ? "bg-green-50 border border-green-300"
+            : "bg-red-50 border border-red-300"
+        }
+      `}
+    >
+      <h3
+        className={`text-lg font-semibold mb-2 text-center
+          ${
+            popup.type === "success"
+              ? "text-green-700"
+              : "text-red-700"
+          }
+        `}
+      >
+        {popup.type === "success" ? "Success" : "Error"}
+      </h3>
+
+      <p className="text-sm text-slate-700 text-center">
+        {popup.message}
+      </p>
+
+      <div className="mt-6 flex justify-center">
+        <Button
+          size="sm"
+          variant="outline"
+          className="px-6"
+          onClick={() =>
+            setPopup({ open: false, message: "", type: "success" })
+          }
+        >
+          Close
+        </Button>
+      </div>
+    </div>
+  </div>
+)}
+
       <div>
         <h1 className="text-2xl font-bold">Result Entry</h1>
         <p className="text-sm text-muted-foreground">

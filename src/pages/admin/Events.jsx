@@ -19,6 +19,11 @@ export default function Events() {
     category: "Men",
     distance: 100,
   });
+  const [popup, setPopup] = useState({
+    open: false,
+    message: "",
+    type: "success", // success | error
+  });
 
   async function fetchAll() {
     const res = await api.get("/events");
@@ -31,13 +36,99 @@ export default function Events() {
 
   async function create(e) {
     e.preventDefault();
-    await api.post("/events/create", form);
-    setForm({ eventName: "", category: "Men", distance: 100 });
-    fetchAll();
+
+    try {
+      await api.post("/events/create", form);
+
+      setPopup({
+        open: true,
+        message: "Event created successfully",
+        type: "success",
+      });
+
+      setForm({ eventName: "", category: "Men", distance: 100 });
+      fetchAll();
+
+      // auto close popup
+      setTimeout(() => {
+        setPopup({ open: false, message: "", type: "success" });
+      }, 2000);
+    } catch (err) {
+      setPopup({
+        open: true,
+        message: "Failed to create event",
+        type: "error",
+      });
+    }
   }
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-white to-indigo-50">
+      {/* POPUP */}
+    {popup.open && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+    <div
+      className={`
+        w-full max-w-sm rounded-2xl p-6 shadow-xl
+        animate-in zoom-in-95 fade-in duration-200
+        ${
+          popup.type === "success"
+            ? "bg-white border border-green-200"
+            : "bg-white border border-red-200"
+        }
+      `}
+    >
+      {/* ICON */}
+      <div className="flex items-center justify-center mb-4">
+        <div
+          className={`
+            flex h-12 w-12 items-center justify-center rounded-full
+            ${
+              popup.type === "success"
+                ? "bg-green-100 text-green-600"
+                : "bg-red-100 text-red-600"
+            }
+          `}
+        >
+          {popup.type === "success" ? "✓" : "✕"}
+        </div>
+      </div>
+
+      {/* TITLE */}
+      <h3
+        className={`text-center text-lg font-semibold
+          ${
+            popup.type === "success"
+              ? "text-green-700"
+              : "text-red-700"
+          }
+        `}
+      >
+        {popup.type === "success" ? "Success" : "Error"}
+      </h3>
+
+      {/* MESSAGE */}
+      <p className="mt-2 text-center text-sm text-slate-600">
+        {popup.message}
+      </p>
+
+      {/* ACTION */}
+      <div className="mt-6 flex justify-center">
+        <Button
+          size="sm"
+          className="px-6"
+          variant={popup.type === "success" ? "default" : "destructive"}
+          onClick={() =>
+            setPopup({ open: false, message: "", type: "success" })
+          }
+        >
+          Close
+        </Button>
+      </div>
+    </div>
+  </div>
+)}
+
 
       {/* ================= BACKGROUND BLOBS ================= */}
       <div className="pointer-events-none absolute -top-40 -left-40 h-96 w-96 rounded-full bg-indigo-200/40 blur-3xl" />
@@ -51,7 +142,6 @@ export default function Events() {
 
       {/* ================= PAGE CONTENT ================= */}
       <div className="relative z-10 max-w-6xl mx-auto px-6 py-10 space-y-10">
-
         {/* ================= PAGE HEADER ================= */}
         <div className="animate-in fade-in slide-in-from-top-2 duration-300">
           <h1 className="text-2xl font-bold tracking-tight">Events</h1>
@@ -102,9 +192,7 @@ export default function Events() {
                 <label className="text-sm font-medium">Category</label>
                 <Select
                   value={form.category}
-                  onValueChange={(val) =>
-                    setForm({ ...form, category: val })
-                  }
+                  onValueChange={(val) => setForm({ ...form, category: val })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -183,7 +271,6 @@ export default function Events() {
             )}
           </CardContent>
         </Card>
-
       </div>
     </div>
   );
