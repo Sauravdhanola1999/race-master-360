@@ -146,23 +146,28 @@ export default function Login() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat px-4 relative"
+      className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat px-4 relative track-field-bg"
     >
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-black/60"></div>
 
       {/* Login Card */}
       <div className="relative z-10 w-full max-w-md">
-        <Card className="border border-slate-200 shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-center text-2xl">
+        <Card className="border border-slate-700 shadow-xl bg-slate-800 rounded-xl">
+          <CardHeader className="bg-slate-700 border-b border-slate-600 rounded-t-xl">
+            <CardTitle className="text-center text-2xl font-bold text-white flex items-center justify-center gap-2">
+              <div className="p-2 bg-green-500/20 rounded-lg border border-green-500/30">
+                <span className="text-3xl">🔐</span>
+              </div>
+              <span>🔐</span>
               Admin Login
             </CardTitle>
           </CardHeader>
 
-          <CardContent>
+          <CardContent className="pt-6">
             {errMsg && (
-              <div className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">
+              <div className="mb-4 rounded-lg bg-red-900/30 border border-red-700 px-4 py-3 text-sm text-red-300 flex items-center gap-2">
+                <span>⚠️</span>
                 {errMsg}
               </div>
             )}
@@ -170,25 +175,33 @@ export default function Login() {
             <form onSubmit={handleLogin} className="space-y-4">
               {/* Email */}
               <div>
-                <Label>Email</Label>
+                <Label className="text-sm font-medium text-slate-300 mb-2 block flex items-center gap-2">
+                  <span>📧</span>
+                  Email
+                </Label>
                 <Input
                   type="email"
                   placeholder="admin@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus:border-green-500 focus:ring-green-500"
                 />
               </div>
 
               {/* Password */}
               <div>
-                <Label>Password</Label>
+                <Label className="text-sm font-medium text-slate-300 mb-2 block flex items-center gap-2">
+                  <span>🔒</span>
+                  Password
+                </Label>
                 <Input
                   type="password"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus:border-green-500 focus:ring-green-500"
                 />
               </div>
 
@@ -196,9 +209,19 @@ export default function Login() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-indigo-600 hover:bg-indigo-700"
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-6 rounded-lg shadow-md flex items-center justify-center gap-2"
               >
-                {loading ? "Logging in..." : "Login"}
+                {loading ? (
+                  <>
+                    <span>⏳</span>
+                    Logging in...
+                  </>
+                ) : (
+                  <>
+                    <span>🚀</span>
+                    Login
+                  </>
+                )}
               </Button>
             </form>
           </CardContent>

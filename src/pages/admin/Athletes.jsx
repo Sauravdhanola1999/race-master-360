@@ -22,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Athletes() {
   const [athletes, setAthletes] = useState([]);
+  const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({
     name: "",
     country: "",
@@ -31,6 +32,7 @@ export default function Athletes() {
     seasonBest: "",
   });
 
+  const [errors, setErrors] = useState({});
   const [popup, setPopup] = useState({
     open: false,
     message: "",
@@ -42,84 +44,238 @@ export default function Athletes() {
   }, []);
 
   async function fetchAll() {
-    const res = await api.get("/athletes");
-    setAthletes(res.data.data || res.data);
+    try {
+      const res = await api.get("/athletes");
+      setAthletes(res.data.data || res.data);
+    } catch (err) {
+      setPopup({
+        open: true,
+        message: "Failed to load athletes",
+        type: "error",
+      });
+      setTimeout(() => {
+        setPopup({ open: false, message: "", type: "success" });
+      }, 3000);
+    }
+  }
+
+  // Validation function matching backend rules
+  function validateForm(isEdit = false) {
+    const newErrors = {};
+
+    // Name validation
+    if (!form.name || form.name.trim() === "") {
+      newErrors.name = "Name is required";
+    }
+
+    // Country validation
+    if (!form.country || form.country.trim() === "") {
+      newErrors.country = "Country is required";
+    }
+
+    // Age validation
+    const ageNum = Number(form.age);
+    if (!form.age || form.age === "") {
+      newErrors.age = "Age is required";
+    } else if (!Number.isInteger(ageNum)) {
+      newErrors.age = "Age must be a number";
+    } else if (isEdit) {
+      // For update: age must be >= 1
+      if (ageNum < 1) {
+        newErrors.age = "Age must be at least 1";
+      }
+    } else {
+      // For create: age must be between 10 and 60
+      if (ageNum < 10 || ageNum > 60) {
+        newErrors.age = "Age must be between 10 and 60";
+      }
+    }
+
+    // Gender validation
+    if (!["M", "F", "O"].includes(form.gender)) {
+      newErrors.gender = "Invalid gender";
+    }
+
+    // Personal Best validation (optional)
+    if (form.personalBest && form.personalBest !== "") {
+      const pbNum = parseFloat(form.personalBest);
+      if (isNaN(pbNum) || pbNum < 0) {
+        newErrors.personalBest = "Personal best must be a positive number";
+      }
+    }
+
+    // Season Best validation (optional)
+    if (form.seasonBest && form.seasonBest !== "") {
+      const sbNum = parseFloat(form.seasonBest);
+      if (isNaN(sbNum) || sbNum < 0) {
+        newErrors.seasonBest = "Season best must be a positive number";
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }
+
+  function resetForm() {
+    setForm({
+      name: "",
+      country: "",
+      age: "",
+      gender: "M",
+      personalBest: "",
+      seasonBest: "",
+    });
+    setErrors({});
+    setEditingId(null);
+  }
+
+  function handleEdit(athlete) {
+    setEditingId(athlete.id);
+    setForm({
+      name: athlete.name || "",
+      country: athlete.country || "",
+      age: athlete.age?.toString() || "",
+      gender: athlete.gender || "M",
+      personalBest: athlete.personalBest?.toString() || "",
+      seasonBest: athlete.seasonBest?.toString() || "",
+    });
+    setErrors({});
+  }
+
+  function handleCancel() {
+    resetForm();
   }
 
   async function create(e) {
     e.preventDefault();
 
+    if (!validateForm(false)) {
+      return;
+    }
+
     const payload = {
-      ...form,
-      age: Number(form.age),
+      name: form.name.trim(),
       country: form.country.toUpperCase().slice(0, 3),
+      age: Number(form.age),
+      gender: form.gender,
     };
-    if (!payload.personalBest) delete payload.personalBest;
-    if (!payload.seasonBest) delete payload.seasonBest;
+
+    if (form.personalBest && form.personalBest !== "") {
+      payload.personalBest = parseFloat(form.personalBest);
+    }
+    if (form.seasonBest && form.seasonBest !== "") {
+      payload.seasonBest = parseFloat(form.seasonBest);
+    }
 
     try {
       await api.post("/athletes/create", payload);
-
       setPopup({
         open: true,
         message: "Athlete added successfully",
         type: "success",
       });
-
-      setForm({
-        name: "",
-        country: "",
-        age: "",
-        gender: "M",
-        personalBest: "",
-        seasonBest: "",
-      });
-
+      resetForm();
       fetchAll();
-
-      // auto-close popup
       setTimeout(() => {
         setPopup({ open: false, message: "", type: "success" });
       }, 2000);
     } catch (err) {
+      const errorMsg =
+        err.response?.data?.message || "Failed to add athlete";
       setPopup({
         open: true,
-        message: "Failed to add athlete",
+        message: errorMsg,
         type: "error",
       });
+      setTimeout(() => {
+        setPopup({ open: false, message: "", type: "success" });
+      }, 3000);
     }
   }
 
-  {
-    /* POPUP */
+  async function update(e) {
+    e.preventDefault();
+
+    if (!validateForm(true)) {
+      return;
+    }
+
+    const payload = {};
+
+    if (form.name.trim() !== "") {
+      payload.name = form.name.trim();
+    }
+    if (form.country.trim() !== "") {
+      payload.country = form.country.toUpperCase().slice(0, 3);
+    }
+    if (form.age !== "") {
+      payload.age = Number(form.age);
+    }
+    if (form.gender) {
+      payload.gender = form.gender;
+    }
+    if (form.personalBest !== "") {
+      payload.personalBest = parseFloat(form.personalBest);
+    }
+    if (form.seasonBest !== "") {
+      payload.seasonBest = parseFloat(form.seasonBest);
+    }
+
+    try {
+      await api.put(`/athletes/edit/${editingId}`, payload);
+      setPopup({
+        open: true,
+        message: "Athlete updated successfully",
+        type: "success",
+      });
+      resetForm();
+      fetchAll();
+      setTimeout(() => {
+        setPopup({ open: false, message: "", type: "success" });
+      }, 2000);
+    } catch (err) {
+      const errorMsg =
+        err.response?.data?.message || "Failed to update athlete";
+      setPopup({
+        open: true,
+        message: errorMsg,
+        type: "error",
+      });
+      setTimeout(() => {
+        setPopup({ open: false, message: "", type: "success" });
+      }, 3000);
+    }
   }
 
   return (
     <div className="space-y-8">
+      {/* POPUP MODAL */}
       {popup.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div
             className={`
-        w-full max-w-sm rounded-2xl p-6 shadow-xl
+        w-full max-w-sm rounded-lg p-6 shadow-xl
         animate-in zoom-in-95 fade-in duration-200
+        border
+        bg-slate-800
         ${
           popup.type === "success"
-            ? "bg-green-50 border border-green-300"
-            : "bg-red-50 border border-red-300"
+            ? "border-green-500/50"
+            : "border-red-500/50"
         }
       `}
           >
             {/* HEADER */}
             <h3
-              className={`text-lg font-semibold mb-2 text-center
-          ${popup.type === "success" ? "text-green-700" : "text-red-700"}
+              className={`text-lg font-semibold mb-3 text-center
+          ${popup.type === "success" ? "text-green-400" : "text-red-400"}
         `}
             >
               {popup.type === "success" ? "Success" : "Error"}
             </h3>
 
             {/* MESSAGE */}
-            <p className="text-sm text-slate-700 text-center">
+            <p className="text-sm text-slate-300 text-center">
               {popup.message}
             </p>
 
@@ -128,7 +284,11 @@ export default function Athletes() {
               <Button
                 size="sm"
                 variant="outline"
-                className="px-6"
+                className={`px-6 border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white ${
+                  popup.type === "success"
+                    ? "hover:border-green-500"
+                    : "hover:border-red-500"
+                }`}
                 onClick={() =>
                   setPopup({ open: false, message: "", type: "success" })
                 }
@@ -142,119 +302,291 @@ export default function Athletes() {
 
       {/* PAGE TITLE */}
       <div>
-        <h1 className="text-2xl font-bold">Athletes</h1>
-        <p className="text-sm text-muted-foreground">
-          Manage registered athletes for events
+        <h1 className="text-3xl font-bold text-white flex items-center gap-2">
+          <span className="text-3xl">👥</span>
+          Athletes
+        </h1>
+        <p className="text-slate-400 mt-1">
+          ✏️ Manage registered athletes for events
         </p>
       </div>
 
-      {/* ADD ATHLETE */}
-      <Card className="border border-slate-200 shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-lg">Add Athlete</CardTitle>
+      {/* ADD/EDIT ATHLETE */}
+      <Card className="sports-card">
+        <CardHeader className="bg-slate-700/50 border-b border-slate-600 rounded-t-lg py-4">
+          <CardTitle className="text-xl font-bold text-white flex items-center gap-3">
+            {editingId ? (
+              <>
+                <div className="p-2 bg-green-500/20 rounded-lg border border-green-500/30">
+                  <span className="text-2xl">✏️</span>
+                </div>
+                Edit Athlete
+              </>
+            ) : (
+              <>
+                <div className="p-2 bg-green-500/20 rounded-lg border border-green-500/30">
+                  <span className="text-2xl">➕</span>
+                </div>
+                Add Athlete
+              </>
+            )}
+          </CardTitle>
         </CardHeader>
 
         <CardContent>
           <form
-            onSubmit={create}
-            className="grid grid-cols-1 md:grid-cols-6 gap-4"
+            onSubmit={editingId ? update : create}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
           >
-            <div className="md:col-span-2">
-              <label className="text-sm font-medium">Athlete Name</label>
+            <div className="md:col-span-2 lg:col-span-1">
+              <label className="text-sm font-medium text-slate-300">
+                Athlete Name <span className="text-red-400">*</span>
+              </label>
               <Input
                 placeholder="Enter name"
                 value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                required
+                onChange={(e) => {
+                  setForm({ ...form, name: e.target.value });
+                  if (errors.name) setErrors({ ...errors, name: "" });
+                }}
+                className={`bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus:border-green-500 focus:ring-green-500 ${errors.name ? "border-red-500" : ""}`}
               />
+              {errors.name && (
+                <p className="text-xs text-red-400 mt-1">{errors.name}</p>
+              )}
             </div>
 
             <div>
-              <label className="text-sm font-medium">Country</label>
+              <label className="text-sm font-medium text-slate-300">
+                Country <span className="text-red-400">*</span>
+              </label>
               <CountrySelect
                 value={form.country}
-                onChange={(val) => setForm({ ...form, country: val })}
+                onChange={(val) => {
+                  setForm({ ...form, country: val });
+                  if (errors.country) setErrors({ ...errors, country: "" });
+                }}
+                hasError={!!errors.country}
               />
+              {errors.country && (
+                <p className="text-xs text-red-400 mt-1">{errors.country}</p>
+              )}
             </div>
 
             <div>
-              <label className="text-sm font-medium">Age</label>
+              <label className="text-sm font-medium text-slate-300">
+                Age <span className="text-red-400">*</span>
+              </label>
               <Input
                 type="number"
-                placeholder="Age"
+                placeholder={editingId ? "Age" : "10-60"}
+                min={editingId ? 1 : 10}
+                max={editingId ? undefined : 60}
                 value={form.age}
-                onChange={(e) => setForm({ ...form, age: e.target.value })}
+                onChange={(e) => {
+                  setForm({ ...form, age: e.target.value });
+                  if (errors.age) setErrors({ ...errors, age: "" });
+                }}
+                className={`bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus:border-green-500 focus:ring-green-500 ${errors.age ? "border-red-500" : ""}`}
               />
+              {errors.age && (
+                <p className="text-xs text-red-400 mt-1">{errors.age}</p>
+              )}
             </div>
 
             <div>
-              <label className="text-sm font-medium">Gender</label>
+              <label className="text-sm font-medium text-slate-300">
+                Gender <span className="text-red-400">*</span>
+              </label>
               <Select
                 value={form.gender}
-                onValueChange={(val) => setForm({ ...form, gender: val })}
+                onValueChange={(val) => {
+                  setForm({ ...form, gender: val });
+                  if (errors.gender) setErrors({ ...errors, gender: "" });
+                }}
               >
-                <SelectTrigger>
+                <SelectTrigger className={`bg-slate-700 border-slate-600 text-white focus:border-green-500 focus:ring-green-500 ${errors.gender ? "border-red-500" : ""}`}>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="M">Male</SelectItem>
-                  <SelectItem value="F">Female</SelectItem>
-                  <SelectItem value="O">Other</SelectItem>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectItem value="M" className="text-white hover:bg-slate-700">Male</SelectItem>
+                  <SelectItem value="F" className="text-white hover:bg-slate-700">Female</SelectItem>
+                  <SelectItem value="O" className="text-white hover:bg-slate-700">Other</SelectItem>
                 </SelectContent>
               </Select>
+              {errors.gender && (
+                <p className="text-xs text-red-400 mt-1">{errors.gender}</p>
+              )}
             </div>
 
-            <div className="flex items-end">
-              <Button className="w-full bg-indigo-600 hover:bg-indigo-700">
-                Add Athlete
+            <div>
+              <label className="text-sm font-medium text-slate-300">Personal Best (s)</label>
+              <Input
+                type="number"
+                step="0.01"
+                placeholder="9.58"
+                min="0"
+                value={form.personalBest}
+                onChange={(e) => {
+                  setForm({ ...form, personalBest: e.target.value });
+                  if (errors.personalBest)
+                    setErrors({ ...errors, personalBest: "" });
+                }}
+                className={`bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus:border-green-500 focus:ring-green-500 ${errors.personalBest ? "border-red-500" : ""}`}
+              />
+              {errors.personalBest && (
+                <p className="text-xs text-red-400 mt-1">
+                  {errors.personalBest}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-slate-300">Season Best (s)</label>
+              <Input
+                type="number"
+                step="0.01"
+                placeholder="9.90"
+                min="0"
+                value={form.seasonBest}
+                onChange={(e) => {
+                  setForm({ ...form, seasonBest: e.target.value });
+                  if (errors.seasonBest)
+                    setErrors({ ...errors, seasonBest: "" });
+                }}
+                className={`bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus:border-green-500 focus:ring-green-500 ${errors.seasonBest ? "border-red-500" : ""}`}
+              />
+              {errors.seasonBest && (
+                <p className="text-xs text-red-400 mt-1">
+                  {errors.seasonBest}
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-end gap-3 md:col-span-2 lg:col-span-3 pt-2">
+              <Button
+                type="submit"
+                className="bg-green-600 hover:bg-green-700 text-white font-semibold shadow-md hover:shadow-lg transition-all flex items-center gap-2"
+              >
+                {editingId ? (
+                  <>
+                    <span>💾</span>
+                    Update Athlete
+                  </>
+                ) : (
+                  <>
+                    <span>➕</span>
+                    Add Athlete
+                  </>
+                )}
               </Button>
+              {editingId && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCancel}
+                  className="flex items-center gap-2 border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white font-medium"
+                >
+                  <span>❌</span>
+                  Cancel
+                </Button>
+              )}
             </div>
           </form>
         </CardContent>
       </Card>
 
       {/* ATHLETES LIST */}
-      <Card className="border border-slate-200 shadow-sm">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-lg">Athletes List</CardTitle>
-          <span className="text-sm text-muted-foreground">
+      <Card className="sports-card">
+        <CardHeader className="flex flex-row items-center justify-between bg-slate-700/50 border-b border-slate-600 rounded-t-lg py-4">
+          <CardTitle className="text-xl font-bold text-white flex items-center gap-3">
+            <div className="p-2 bg-green-500/20 rounded-lg border border-green-500/30">
+              <span className="text-2xl">👥</span>
+            </div>
+            Athletes List
+          </CardTitle>
+          <span className="text-sm font-semibold px-4 py-1.5 rounded-lg bg-green-600 text-white border-0 shadow-md flex items-center gap-2">
+            <span>📊</span>
             Total: {athletes.length}
           </span>
         </CardHeader>
 
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Country</TableHead>
-                <TableHead>Age</TableHead>
-                <TableHead>Gender</TableHead>
-                <TableHead>PB</TableHead>
-              </TableRow>
-            </TableHeader>
-
-            <TableBody>
-              {athletes.map((a, i) => (
-                <TableRow
-                  key={a.id}
-                  className={i % 2 === 0 ? "bg-slate-50" : ""}
-                >
-                  <TableCell className="font-medium">{a.name}</TableCell>
-                  <TableCell>{a.country}</TableCell>
-                  <TableCell>{a.age}</TableCell>
-                  <TableCell>
-                    {a.gender === "M"
-                      ? "Male"
-                      : a.gender === "F"
-                        ? "Female"
-                        : "Other"}
-                  </TableCell>
-                  <TableCell>{a.personalBest ?? "-"}</TableCell>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-slate-700/50 hover:bg-slate-700/50 border-b border-slate-600">
+                  <TableHead className="font-semibold text-slate-300">👤 Name</TableHead>
+                  <TableHead className="font-semibold text-slate-300">🌍 Country</TableHead>
+                  <TableHead className="font-semibold text-slate-300">🎂 Age</TableHead>
+                  <TableHead className="font-semibold text-slate-300">⚧️ Gender</TableHead>
+                  <TableHead className="font-semibold text-slate-300">⭐ PB</TableHead>
+                  <TableHead className="font-semibold text-slate-300">🔥 SB</TableHead>
+                  <TableHead className="text-right font-semibold text-slate-300">⚙️ Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+
+              <TableBody>
+                {athletes.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-12 text-slate-400">
+                      <div className="flex flex-col items-center gap-2">
+                        <span className="text-6xl">👤</span>
+                        <p className="font-medium text-slate-300 text-lg">👤 No athletes found</p>
+                        <p className="text-sm text-slate-500">➕ Start by adding your first athlete</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  athletes.map((a, i) => (
+                    <TableRow
+                      key={a.id}
+                      className={`transition-colors border-b border-slate-700 ${
+                        i % 2 === 0 ? "bg-slate-800/50" : "bg-slate-800/30"
+                      } hover:bg-slate-700/50`}
+                    >
+                      <TableCell className="font-semibold text-white">{a.name}</TableCell>
+                      <TableCell className="text-slate-300">
+                        <span className="px-2 py-1 bg-slate-700 rounded-md text-xs font-medium border border-slate-600">
+                          {a.country}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-slate-300 font-medium">{a.age}</TableCell>
+                      <TableCell>
+                        <span className={`px-2 py-1 rounded-md text-xs font-medium ${
+                          a.gender === "M" 
+                            ? "bg-blue-500/20 text-blue-400 border border-blue-500/30" 
+                            : a.gender === "F"
+                            ? "bg-pink-500/20 text-pink-400 border border-pink-500/30"
+                            : "bg-purple-500/20 text-purple-400 border border-purple-500/30"
+                        }`}>
+                          {a.gender === "M" ? "Male" : a.gender === "F" ? "Female" : "Other"}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-slate-300 font-mono font-semibold">
+                        {a.personalBest ? `${a.personalBest}s` : "-"}
+                      </TableCell>
+                      <TableCell className="text-slate-300 font-mono font-semibold">
+                        {a.seasonBest ? `${a.seasonBest}s` : "-"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEdit(a)}
+                          className="flex items-center gap-1 border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white hover:border-green-500/50 font-medium"
+                          disabled={editingId === a.id}
+                        >
+                          <span>✏️</span>
+                          Edit
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>

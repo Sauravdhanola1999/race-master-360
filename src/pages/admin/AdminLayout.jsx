@@ -9,36 +9,40 @@ export default function AdminLayout() {
 
   const navLink = (path) =>
     cn(
-      "text-sm font-medium px-3 py-1.5 rounded-md transition",
+      "text-sm font-medium px-4 py-2 rounded-lg transition-all flex items-center",
       location.pathname.startsWith(path)
-        ? "bg-indigo-600 text-white"
-        : "text-slate-700 hover:bg-indigo-50 hover:text-indigo-700"
+        ? "bg-green-600 text-white shadow-md"
+        : "text-slate-300 hover:bg-slate-700 hover:text-white"
     );
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-white to-indigo-50">
-
-      {/* ===== BACKGROUND BLOBS ===== */}
-      <div className="pointer-events-none absolute -top-40 -left-40 h-96 w-96 rounded-full bg-indigo-200/40 blur-3xl" />
-      <div className="pointer-events-none absolute top-1/3 -right-40 h-96 w-96 rounded-full bg-purple-200/40 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-0 left-1/3 h-96 w-96 rounded-full bg-sky-200/40 blur-3xl" />
+    <div className="relative min-h-screen overflow-hidden track-field-bg">
 
       {/* ===== CONTENT ===== */}
       <div className="relative z-10 max-w-6xl mx-auto px-6 py-8 space-y-8 overflow-x-hidden">
 
         {/* ================= HEADER ================= */}
-        <Card className="bg-white/80 backdrop-blur border border-slate-200 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
+        <Card className="bg-slate-800 border border-slate-700 shadow-lg animate-in fade-in slide-in-from-top-2 duration-300 rounded-lg">
           <CardContent className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 py-4">
-            <h2 className="text-xl font-semibold">Admin Panel</h2>
+            <h2 className="text-xl font-bold text-white flex items-center gap-3">
+              <div className="p-2 bg-green-500/20 rounded-lg border border-green-500/30">
+                <span className="text-2xl">🏆</span>
+              </div>
+              <span className="text-xl">⚙️</span>
+              Admin Panel
+            </h2>
 
             <nav className="flex items-center gap-2">
               <Link to="/admin/athletes" className={navLink("/admin/athletes")}>
+                <span>👥</span>
                 Athletes
               </Link>
               <Link to="/admin/events" className={navLink("/admin/events")}>
+                <span>📅</span>
                 Events
               </Link>
               <Link to="/admin/results" className={navLink("/admin/results")}>
+                <span>🏆</span>
                 Results
               </Link>
             </nav>
