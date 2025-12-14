@@ -30,7 +30,7 @@ export default function Home() {
     <div className="relative min-h-screen overflow-hidden track-field-bg">
 
       {/* ===== CONTENT ===== */}
-      <div className="relative z-10 max-w-6xl mx-auto px-6 py-12 space-y-12">
+      <div className="relative z-10 max-w-6xl mx-auto px-3 sm:px-4 md:px-6 py-6 sm:py-8 md:py-12 space-y-8 sm:space-y-10 md:space-y-12">
 
         {/* ================= HERO SLOGAN CARD ================= */}
         <Card className="relative overflow-hidden bg-slate-800 border border-slate-700 rounded-xl shadow-xl">
@@ -59,11 +59,11 @@ export default function Home() {
 
         {/* ================= PAGE HEADER ================= */}
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-white flex items-center gap-2">
-            <span className="text-3xl">📅</span>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-2">
+            <span className="text-2xl sm:text-3xl">📅</span>
             Upcoming Events
           </h2>
-          <p className="text-slate-400 mt-1">
+          <p className="text-sm sm:text-base text-slate-400 mt-1">
             🏁 Live and upcoming athletics competitions
           </p>
         </div>
@@ -115,28 +115,29 @@ export default function Home() {
                 </div>
               </CardHeader>
 
-              <CardContent className="flex items-center justify-between pt-6">
-                <div className="text-sm text-slate-400 flex items-center gap-1">
+              <CardContent className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 pt-4 sm:pt-6">
+                <div className="text-xs sm:text-sm text-slate-400 flex items-center gap-1">
                   <span>👁️</span>
-                  View heats, results & leaderboard
+                  <span className="hidden sm:inline">View heats, results & leaderboard</span>
+                  <span className="sm:hidden">View details</span>
                 </div>
 
-                <div className="flex gap-2">
-                  <Link to={`/event/${ev.id}`}>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Link to={`/event/${ev.id}`} className="w-full sm:w-auto">
                     <Button 
                       variant="outline" 
                       size="sm"
-                      className="border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white font-medium"
+                      className="w-full sm:w-auto border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white font-medium text-xs sm:text-sm"
                     >
                       <span className="mr-1">📋</span>
                       Details
                     </Button>
                   </Link>
 
-                  <Link to={`/live?eventId=${ev.id}`}>
+                  <Link to={`/live?eventId=${ev.id}`} className="w-full sm:w-auto">
                     <Button
                       size="sm"
-                      className="bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg font-semibold"
+                      className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg font-semibold text-xs sm:text-sm"
                     >
                       <span className="mr-1">🔴</span>
                       Live →

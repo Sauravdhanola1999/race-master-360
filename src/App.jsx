@@ -16,6 +16,9 @@ import Login from "./pages/Login";
 export default function App(){
   return (
     <div className="min-h-screen">
+      {/* Simple Background Animations */}
+      <div className="animated-track-lines"></div>
+      
       <Header />
       <div className="">
         <Routes>

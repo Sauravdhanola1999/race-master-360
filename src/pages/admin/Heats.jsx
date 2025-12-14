@@ -208,7 +208,7 @@ export default function Heats() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* POPUP */}
       {popup.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
@@ -262,11 +262,11 @@ export default function Heats() {
 
       {/* PAGE HEADER */}
       <div>
-        <h1 className="text-3xl font-bold text-white flex items-center gap-2">
-          <span className="text-3xl">🔥</span>
+        <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2">
+          <span className="text-2xl sm:text-3xl">🔥</span>
           Heats
         </h1>
-        <p className="text-slate-400 mt-1">
+        <p className="text-sm sm:text-base text-slate-400 mt-1">
           Create and manage race heats
         </p>
       </div>
@@ -294,7 +294,7 @@ export default function Heats() {
                 loadHeats(val);
               }}
             >
-              <SelectTrigger className={`w-full md:w-96 bg-slate-700 border-slate-600 text-white focus:border-green-500 focus:ring-green-500 ${
+              <SelectTrigger className={`w-full bg-slate-700 border-slate-600 text-white focus:border-green-500 focus:ring-green-500 ${
                 errors.eventId ? "border-red-500" : ""
               }`}>
                 <SelectValue placeholder="Choose an event" />
@@ -340,7 +340,7 @@ export default function Heats() {
           <CardContent>
             <form
               onSubmit={editingId ? updateHeat : createHeat}
-              className="grid grid-cols-1 md:grid-cols-4 gap-4"
+              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4"
             >
               <div>
                 <label className="text-sm font-medium text-slate-300">
@@ -391,7 +391,7 @@ export default function Heats() {
                 )}
               </div>
 
-              <div className="flex items-end gap-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2 sm:col-span-2 md:col-span-1">
                 <Button
                   type="submit"
                   className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold shadow-md flex items-center justify-center gap-2"
@@ -438,15 +438,17 @@ export default function Heats() {
           </CardHeader>
 
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-slate-700/50 hover:bg-slate-700/50 border-b border-slate-600">
-                    <TableHead className="font-semibold text-slate-300">🔥 Heat #</TableHead>
-                    <TableHead className="font-semibold text-slate-300">🏁 Round</TableHead>
-                    <TableHead className="text-right font-semibold text-slate-300">⚙️ Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
+            <div className="overflow-x-auto -mx-4 sm:mx-0">
+              <div className="inline-block min-w-full align-middle">
+                <div className="overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-slate-700/50 hover:bg-slate-700/50 border-b border-slate-600">
+                        <TableHead className="font-semibold text-slate-300 text-xs sm:text-sm whitespace-nowrap">🔥 Heat #</TableHead>
+                        <TableHead className="font-semibold text-slate-300 text-xs sm:text-sm whitespace-nowrap">🏁 Round</TableHead>
+                        <TableHead className="text-right font-semibold text-slate-300 text-xs sm:text-sm whitespace-nowrap">⚙️ Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
 
                 <TableBody>
                   {heats.map((h, i) => (
@@ -456,18 +458,18 @@ export default function Heats() {
                         i % 2 === 0 ? "bg-slate-800/50" : "bg-slate-800/30"
                       } hover:bg-slate-700/50`}
                     >
-                      <TableCell className="text-white font-medium">{h.heatNumber}</TableCell>
-                      <TableCell className="text-slate-300">{h.round}</TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-white font-medium text-xs sm:text-sm whitespace-nowrap">{h.heatNumber}</TableCell>
+                      <TableCell className="text-slate-300 text-xs sm:text-sm whitespace-nowrap">{h.round}</TableCell>
+                      <TableCell className="text-right whitespace-nowrap">
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => handleEdit(h)}
-                          className="flex items-center gap-1 border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white hover:border-green-500/50 font-medium"
+                          className="flex items-center gap-1 border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white hover:border-green-500/50 font-medium text-xs sm:text-sm"
                           disabled={editingId === h.id}
                         >
-                          <span>✏️</span>
-                          Edit
+                          <span className="text-xs sm:text-sm">✏️</span>
+                          <span className="hidden sm:inline">Edit</span>
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -488,7 +490,9 @@ export default function Heats() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+                  </Table>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>

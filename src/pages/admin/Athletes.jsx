@@ -325,7 +325,7 @@ export default function Athletes() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* POPUP MODAL */}
       {popup.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
@@ -413,7 +413,7 @@ export default function Athletes() {
         <CardContent>
           <form
             onSubmit={editingId ? update : create}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4"
           >
             <div className="md:col-span-2 lg:col-span-1">
               <label className="text-sm font-medium text-slate-300">
@@ -683,19 +683,21 @@ export default function Athletes() {
         </CardHeader>
 
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-slate-700/50 hover:bg-slate-700/50 border-b border-slate-600">
-                  <TableHead className="font-semibold text-slate-300">👤 Name</TableHead>
-                  <TableHead className="font-semibold text-slate-300">🌍 Country</TableHead>
-                  <TableHead className="font-semibold text-slate-300">🎂 Age</TableHead>
-                  <TableHead className="font-semibold text-slate-300">⚧️ Gender</TableHead>
-                  <TableHead className="font-semibold text-slate-300">⭐ PB</TableHead>
-                  <TableHead className="font-semibold text-slate-300">🔥 SB</TableHead>
-                  <TableHead className="text-right font-semibold text-slate-300">⚙️ Actions</TableHead>
-                </TableRow>
-              </TableHeader>
+          <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <div className="inline-block min-w-full align-middle">
+              <div className="overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-slate-700/50 hover:bg-slate-700/50 border-b border-slate-600">
+                      <TableHead className="font-semibold text-slate-300 text-xs sm:text-sm whitespace-nowrap">👤 Name</TableHead>
+                      <TableHead className="font-semibold text-slate-300 text-xs sm:text-sm whitespace-nowrap">🌍 Country</TableHead>
+                      <TableHead className="font-semibold text-slate-300 text-xs sm:text-sm whitespace-nowrap">🎂 Age</TableHead>
+                      <TableHead className="font-semibold text-slate-300 text-xs sm:text-sm whitespace-nowrap">⚧️ Gender</TableHead>
+                      <TableHead className="font-semibold text-slate-300 text-xs sm:text-sm whitespace-nowrap">⭐ PB</TableHead>
+                      <TableHead className="font-semibold text-slate-300 text-xs sm:text-sm whitespace-nowrap">🔥 SB</TableHead>
+                      <TableHead className="text-right font-semibold text-slate-300 text-xs sm:text-sm whitespace-nowrap">⚙️ Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
 
               <TableBody>
                 {athletes.length === 0 ? (
@@ -716,15 +718,15 @@ export default function Athletes() {
                         i % 2 === 0 ? "bg-slate-800/50" : "bg-slate-800/30"
                       } hover:bg-slate-700/50`}
                     >
-                      <TableCell className="font-semibold text-white">{a.name}</TableCell>
-                      <TableCell className="text-slate-300">
-                        <span className="px-2 py-1 bg-slate-700 rounded-md text-xs font-medium border border-slate-600">
+                      <TableCell className="font-semibold text-white text-xs sm:text-sm whitespace-nowrap">{a.name}</TableCell>
+                      <TableCell className="text-slate-300 text-xs sm:text-sm whitespace-nowrap">
+                        <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-slate-700 rounded-md text-xs font-medium border border-slate-600">
                           {a.country}
                         </span>
                       </TableCell>
-                      <TableCell className="text-slate-300 font-medium">{a.age}</TableCell>
-                      <TableCell>
-                        <span className={`px-2 py-1 rounded-md text-xs font-medium ${
+                      <TableCell className="text-slate-300 font-medium text-xs sm:text-sm whitespace-nowrap">{a.age}</TableCell>
+                      <TableCell className="text-xs sm:text-sm whitespace-nowrap">
+                        <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md text-xs font-medium ${
                           a.gender === "M" 
                             ? "bg-blue-500/20 text-blue-400 border border-blue-500/30" 
                             : a.gender === "F"
@@ -734,29 +736,31 @@ export default function Athletes() {
                           {a.gender === "M" ? "Male" : a.gender === "F" ? "Female" : "Other"}
                         </span>
                       </TableCell>
-                      <TableCell className="text-slate-300 font-mono font-semibold">
+                      <TableCell className="text-slate-300 font-mono font-semibold text-xs sm:text-sm whitespace-nowrap">
                         {a.personalBest ? `${a.personalBest}s` : "-"}
                       </TableCell>
-                      <TableCell className="text-slate-300 font-mono font-semibold">
+                      <TableCell className="text-slate-300 font-mono font-semibold text-xs sm:text-sm whitespace-nowrap">
                         {a.seasonBest ? `${a.seasonBest}s` : "-"}
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right whitespace-nowrap">
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => handleEdit(a)}
-                          className="flex items-center gap-1 border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white hover:border-green-500/50 font-medium"
+                          className="flex items-center gap-1 border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white hover:border-green-500/50 font-medium text-xs sm:text-sm"
                           disabled={editingId === a.id}
                         >
-                          <span>✏️</span>
-                          Edit
+                          <span className="text-xs sm:text-sm">✏️</span>
+                          <span className="hidden sm:inline">Edit</span>
                         </Button>
                       </TableCell>
                     </TableRow>
                   ))
                 )}
               </TableBody>
-            </Table>
+                </Table>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>

@@ -190,8 +190,98 @@
   opacity: 1;
 }
 
-/* Dark Background */
+/* Dark Background with Subtle Animations */
 .track-field-bg {
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle Animated Background Gradient */
+.track-field-bg::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(34, 197, 94, 0.02) 0%,
+    rgba(59, 130, 246, 0.02) 50%,
+    rgba(34, 197, 94, 0.02) 100%
+  );
+  background-size: 200% 200%;
+  animation: gradient-shift 20s ease infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Simple Running Track Lines */
+.animated-track-lines {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.03;
+  overflow: hidden;
+}
+
+.animated-track-lines::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  top: 30%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(34, 197, 94, 0.4) 50%,
+    transparent 100%
+  );
+  animation: track-line-move 12s linear infinite;
+}
+
+.animated-track-lines::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  top: 70%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(34, 197, 94, 0.4) 50%,
+    transparent 100%
+  );
+  animation: track-line-move 12s linear infinite;
+  animation-delay: 6s;
+}
+
+@keyframes track-line-move {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100vw);
+  }
+}
+
+/* Ensure content is above background animations */
+.track-field-bg > * {
+  position: relative;
+  z-index: 1;
 }
 

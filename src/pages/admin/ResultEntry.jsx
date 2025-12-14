@@ -251,13 +251,13 @@ async function submit(e) {
 
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* PAGE HEADER */}
       {popup.open && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
     <div
       className={`
-        w-full max-w-sm rounded-2xl p-6 shadow-xl
+        w-full max-w-sm rounded-2xl p-4 sm:p-6 shadow-xl
         animate-in zoom-in-95 fade-in duration-200
         ${
           popup.type === "success"
@@ -267,7 +267,7 @@ async function submit(e) {
       `}
     >
       <h3
-        className={`text-lg font-semibold mb-2 text-center
+        className={`text-base sm:text-lg font-semibold mb-2 text-center
           ${
             popup.type === "success"
               ? "text-green-700"
@@ -278,15 +278,15 @@ async function submit(e) {
         {popup.type === "success" ? "Success" : "Error"}
       </h3>
 
-      <p className="text-sm text-slate-700 text-center">
+      <p className="text-xs sm:text-sm text-slate-700 text-center">
         {popup.message}
       </p>
 
-      <div className="mt-6 flex justify-center">
+      <div className="mt-4 sm:mt-6 flex justify-center">
         <Button
           size="sm"
           variant="outline"
-          className="px-6"
+          className="px-4 sm:px-6 text-xs sm:text-sm"
           onClick={() =>
             setPopup({ open: false, message: "", type: "success" })
           }
@@ -299,18 +299,26 @@ async function submit(e) {
 )}
 
       <div>
-        <h1 className="text-2xl font-bold">Result Entry</h1>
-        <p className="text-sm text-muted-foreground">
+        <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2">
+          <span className="text-2xl sm:text-3xl">🏆</span>
+          Result Entry
+        </h1>
+        <p className="text-sm sm:text-base text-slate-400 mt-1">
           Enter athlete race results
         </p>
       </div>
 
       {/* EVENT + HEAT */}
-      <Card className="border border-slate-200 shadow-sm">
-        <CardHeader>
-          <CardTitle>Select Event & Heat</CardTitle>
+      <Card className="sports-card">
+        <CardHeader className="bg-slate-700/50 border-b border-slate-600 rounded-t-lg py-3 sm:py-4">
+          <CardTitle className="text-lg sm:text-xl font-bold text-white flex items-center gap-3">
+            <div className="p-1.5 sm:p-2 bg-green-500/20 rounded-lg border border-green-500/30">
+              <span className="text-xl sm:text-2xl">📅</span>
+            </div>
+            Select Event & Heat
+          </CardTitle>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-4 sm:pt-6">
           <div>
             <label className="text-sm font-medium">
               Event <span className="text-red-400">*</span>
@@ -370,15 +378,20 @@ async function submit(e) {
 
       {/* RESULT FORM */}
       {form.eventId && form.heatId && (
-        <Card className="border border-slate-200 shadow-sm">
-          <CardHeader>
-            <CardTitle>Enter Result</CardTitle>
+        <Card className="sports-card">
+          <CardHeader className="bg-slate-700/50 border-b border-slate-600 rounded-t-lg py-3 sm:py-4">
+            <CardTitle className="text-lg sm:text-xl font-bold text-white flex items-center gap-3">
+              <div className="p-1.5 sm:p-2 bg-green-500/20 rounded-lg border border-green-500/30">
+                <span className="text-xl sm:text-2xl">✏️</span>
+              </div>
+              Enter Result
+            </CardTitle>
           </CardHeader>
 
           <CardContent>
             <form
               onSubmit={submit}
-              className="grid grid-cols-1 md:grid-cols-3 gap-4"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 pt-4 sm:pt-6"
             >
               {/* Athlete */}
               <div>
@@ -544,8 +557,8 @@ async function submit(e) {
               </div>
 
               {/* Submit */}
-              <div className="flex items-end md:col-span-3">
-                <Button className="bg-indigo-600 hover:bg-indigo-700">
+              <div className="flex items-end sm:col-span-2 lg:col-span-3">
+                <Button className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-semibold shadow-md text-sm sm:text-base">
                   Save Result
                 </Button>
               </div>

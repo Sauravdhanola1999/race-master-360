@@ -204,7 +204,7 @@ export default function Events() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* POPUP */}
       {popup.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
@@ -293,7 +293,7 @@ export default function Events() {
         <CardContent>
           <form
             onSubmit={editingId ? update : create}
-            className="grid grid-cols-1 md:grid-cols-6 gap-4"
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3 sm:gap-4"
           >
             {/* Event Name */}
             <div className="md:col-span-3">
@@ -371,7 +371,7 @@ export default function Events() {
             </div>
 
             {/* Submit */}
-            <div className="flex items-end gap-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2 sm:col-span-2 md:col-span-1">
               <Button
                 type="submit"
                 className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold shadow-md transition active:scale-95 flex items-center justify-center gap-2"
@@ -424,28 +424,28 @@ export default function Events() {
             <div
               key={ev.id}
               className="
-                  flex items-center justify-between
+                  flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3
                   rounded-lg
                   border border-slate-700
                   bg-slate-800/50
-                  px-4 py-3
+                  px-3 sm:px-4 py-3
                   transition
                   hover:bg-slate-700/50
                 "
             >
               {/* Event Info */}
-              <div className="space-y-0.5">
-                <div className="font-medium text-white">{ev.eventName}</div>
-                <div className="text-sm text-slate-400">
+              <div className="space-y-0.5 flex-1">
+                <div className="font-medium text-white text-sm sm:text-base">{ev.eventName}</div>
+                <div className="text-xs sm:text-sm text-slate-400">
                   {ev.distance}m • {ev.category}
                 </div>
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-4 text-sm">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm">
                 <button
                   onClick={() => handleEdit(ev)}
-                  className="text-green-400 font-medium hover:text-green-300 hover:underline flex items-center gap-1"
+                  className="text-green-400 font-medium hover:text-green-300 hover:underline flex items-center gap-1 whitespace-nowrap"
                   disabled={editingId === ev.id}
                 >
                   <span>✏️</span>
@@ -454,16 +454,16 @@ export default function Events() {
 
                 <Link
                   to={`/admin/results?eventId=${ev.id}`}
-                  className="text-green-400 font-medium hover:text-green-300 hover:underline"
+                  className="text-green-400 font-medium hover:text-green-300 hover:underline whitespace-nowrap"
                 >
-                  Enter Results
+                  Results
                 </Link>
 
                 <Link
                   to={`/event/${ev.id}`}
-                  className="text-blue-400 hover:text-blue-300 hover:underline"
+                  className="text-blue-400 hover:text-blue-300 hover:underline whitespace-nowrap"
                 >
-                  View Public
+                  View
                 </Link>
               </div>
             </div>
