@@ -53,10 +53,16 @@ export default function ResultEntry() {
   async function loadHeatsForEvent(eventId) {
     setForm({ ...form, eventId, heatId: "", athleteId: "" }); // Clear heat and athlete when event changes
     setFilteredAthletes([]); // Clear filtered athletes
+    setHeats([]); // Clear heats first
     if (!eventId) return;
 
-    const res = await api.get(`/heats/event/${eventId}`);
-    setHeats(res.data.data || res.data);
+    try {
+      const res = await api.get(`/heats/event/${eventId}`);
+      setHeats(res.data.data || res.data || []);
+    } catch (err) {
+      console.error("Failed to load heats:", err);
+      setHeats([]); // Set empty array on error
+    }
   }
 
   // Filter athletes based on selected event and heat
@@ -320,7 +326,7 @@ async function submit(e) {
         </CardHeader>
         <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-4 sm:pt-6">
           <div>
-            <label className="text-sm font-medium">
+            <label className="text-sm font-medium text-slate-300">
               Event <span className="text-red-400">*</span>
             </label>
             <Select
@@ -330,12 +336,12 @@ async function submit(e) {
                 if (errors.eventId) setErrors({ ...errors, eventId: "" });
               }}
             >
-              <SelectTrigger className={errors.eventId ? "border-red-500" : ""}>
+              <SelectTrigger className={`bg-slate-700 border-slate-600 text-white focus:border-green-500 focus:ring-green-500 ${errors.eventId ? "border-red-500" : ""}`}>
                 <SelectValue placeholder="Select Event" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-slate-800 border-slate-700">
                 {events.map((ev) => (
-                  <SelectItem key={ev.id} value={String(ev.id)}>
+                  <SelectItem key={ev.id} value={String(ev.id)} className="text-white hover:bg-slate-700">
                     {ev.eventName}
                   </SelectItem>
                 ))}
@@ -346,33 +352,46 @@ async function submit(e) {
             )}
           </div>
 
-          <div>
-            <label className="text-sm font-medium">
-              Heat <span className="text-red-400">*</span>
-            </label>
-            <Select
-              value={form.heatId}
-              onValueChange={(val) => {
-                setForm({ ...form, heatId: val, athleteId: "" }); // Clear athlete when heat changes
-                if (errors.heatId) setErrors({ ...errors, heatId: "" });
-              }}
-              disabled={!form.eventId}
-            >
-              <SelectTrigger className={errors.heatId ? "border-red-500" : ""}>
-                <SelectValue placeholder="Select Heat" />
-              </SelectTrigger>
-              <SelectContent>
-                {heats.map((h) => (
-                  <SelectItem key={h.id} value={String(h.id)}>
-                    Heat {h.heatNumber} ({h.round})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.heatId && (
-              <p className="text-xs text-red-400 mt-1">{errors.heatId}</p>
-            )}
-          </div>
+          {form.eventId && heats.length > 0 && (
+            <div>
+              <label className="text-sm font-medium text-slate-300">
+                Heat <span className="text-red-400">*</span>
+              </label>
+              <Select
+                value={form.heatId}
+                onValueChange={(val) => {
+                  setForm({ ...form, heatId: val, athleteId: "" }); // Clear athlete when heat changes
+                  if (errors.heatId) setErrors({ ...errors, heatId: "" });
+                }}
+                disabled={!form.eventId}
+              >
+                <SelectTrigger className={`bg-slate-700 border-slate-600 text-white focus:border-green-500 focus:ring-green-500 ${errors.heatId ? "border-red-500" : ""}`}>
+                  <SelectValue placeholder="Select Heat" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  {heats.map((h) => (
+                    <SelectItem key={h.id} value={String(h.id)} className="text-white hover:bg-slate-700">
+                      Heat {h.heatNumber} ({h.round})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.heatId && (
+                <p className="text-xs text-red-400 mt-1">{errors.heatId}</p>
+              )}
+            </div>
+          )}
+          
+          {form.eventId && heats.length === 0 && (
+            <div>
+              <label className="text-sm font-medium text-slate-300">
+                Heat
+              </label>
+              <div className="px-3 py-2 rounded-md border border-slate-600 bg-slate-700/50 text-slate-400 text-sm">
+                ⚠️ No heats available for this event. Please create heats first.
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 

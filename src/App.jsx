@@ -20,7 +20,7 @@ export default function App(){
       <div className="animated-track-lines"></div>
       
       <Header />
-      <div className="">
+      <div className="pt-14 sm:pt-16">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/event/:id" element={<EventDetails />} />

@@ -1,8 +1,3 @@
-Here’s a **clean, professional, well-structured README** version of your content, suitable for **GitHub**, **resume projects**, and **portfolio review**.
-I’ve **not removed any meaning**, only organized, clarified, and polished it.
-
----
-
 # 🏃 Athletics Scoreboard System
 
 A full-stack **Athletics Tournament Management & Live Scoreboard System** designed to manage athletes, events, heats, and race results while delivering a **real-time live leaderboard experience** similar to professional sports broadcasts.

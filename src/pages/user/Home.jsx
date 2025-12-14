@@ -103,7 +103,6 @@ export default function Home() {
                       </CardTitle>
 
                       <p className="text-sm text-slate-400 flex items-center gap-2">
-                        <span>🏃</span>
                         Athletics Track Event
                       </p>
                     </div>

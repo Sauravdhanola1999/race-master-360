@@ -683,10 +683,7 @@ export default function Athletes() {
         </CardHeader>
 
         <CardContent className="p-0">
-          <div className="overflow-x-auto -mx-4 sm:mx-0">
-            <div className="inline-block min-w-full align-middle">
-              <div className="overflow-hidden">
-                <Table>
+          <Table>
                   <TableHeader>
                     <TableRow className="bg-slate-700/50 hover:bg-slate-700/50 border-b border-slate-600">
                       <TableHead className="font-semibold text-slate-300 text-xs sm:text-sm whitespace-nowrap">👤 Name</TableHead>
@@ -747,7 +744,7 @@ export default function Athletes() {
                           size="sm"
                           variant="outline"
                           onClick={() => handleEdit(a)}
-                          className="flex items-center gap-1 border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white hover:border-green-500/50 font-medium text-xs sm:text-sm"
+                          className="flex items-center gap-1 border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white hover:border-green-500/50 font-medium text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3"
                           disabled={editingId === a.id}
                         >
                           <span className="text-xs sm:text-sm">✏️</span>
@@ -759,9 +756,6 @@ export default function Athletes() {
                 )}
               </TableBody>
                 </Table>
-              </div>
-            </div>
-          </div>
         </CardContent>
       </Card>
     </div>

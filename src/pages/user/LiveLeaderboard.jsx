@@ -239,18 +239,18 @@ export default function LiveLeaderboard() {
       <div className="relative z-10 max-w-6xl mx-auto px-3 sm:px-4 md:px-6 pt-2 sm:pt-4 md:pt-6 pb-4 sm:pb-6 md:pb-8 space-y-3 sm:space-y-4 md:space-y-6">
 
         {/* ===== LIVE MARQUEE ===== */}
-        <div className="rounded-lg border border-green-500/30 bg-slate-800/80 backdrop-blur px-3 sm:px-4 py-2 sm:py-3 shadow-lg">
-          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 text-xs sm:text-sm">
-            <div className="flex items-center gap-2 font-semibold text-green-400 shrink-0">
-              <span className="relative flex h-2 w-2">
+        <div className="rounded-lg border border-green-500/30 bg-slate-800/80 backdrop-blur px-2 sm:px-3 md:px-4 py-2 sm:py-3 shadow-lg overflow-hidden">
+          <div className="flex flex-col sm:flex-row items-center gap-1.5 sm:gap-2 md:gap-3 text-xs sm:text-sm">
+            <div className="flex items-center gap-1.5 sm:gap-2 font-semibold text-green-400 shrink-0">
+              <span className="relative flex h-2 w-2 shrink-0">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
               </span>
-              Live Update
+              <span className="whitespace-nowrap">Live Update</span>
             </div>
 
-            <div className="flex-1 overflow-hidden whitespace-nowrap text-center w-full sm:w-auto">
-              <div className="inline-block animate-marquee text-white font-medium text-xs sm:text-sm">
+            <div className="flex-1 min-w-0 overflow-hidden text-center w-full sm:w-auto">
+              <div className="inline-block animate-marquee text-white font-medium text-xs sm:text-sm whitespace-nowrap">
                 🏆 Winner: {winner?.Athlete?.name || "—"}{" "}
                 {winner?.finishTime && `(${winner.finishTime.toFixed(2)}s)`} |
                 🥈 Runner-up: {runnerUp?.Athlete?.name || "—"}{" "}
@@ -321,43 +321,41 @@ export default function LiveLeaderboard() {
         </Card>
 
         {/* ===== FULL RESULTS ===== */}
-        <Card className="border border-slate-700 bg-slate-800 shadow-lg">
-          <CardHeader className="pb-3 sm:pb-4">
-            <CardTitle className="text-white flex items-center gap-2 text-lg sm:text-xl">
+        <Card className="border border-slate-700 bg-slate-800 shadow-lg overflow-hidden">
+          <CardHeader className="pb-3 sm:pb-4 px-3 sm:px-4 md:px-6">
+            <CardTitle className="text-white flex items-center gap-2 text-base sm:text-lg md:text-xl">
               <span>📋</span>
               Full Results
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto -mx-4 sm:mx-0">
-              <div className="inline-block min-w-full align-middle">
-                <div className="overflow-hidden">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-slate-700/50 border-b border-slate-600">
-                        <TableHead className="text-slate-300 text-xs sm:text-sm whitespace-nowrap">🏆 Pos</TableHead>
-                        <TableHead className="text-slate-300 text-xs sm:text-sm whitespace-nowrap">👤 Athlete</TableHead>
-                        <TableHead className="text-right text-slate-300 text-xs sm:text-sm whitespace-nowrap">⏱️ Finish</TableHead>
-                        <TableHead className="text-right text-slate-300 text-xs sm:text-sm whitespace-nowrap">⚡ Reaction</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {board.map((r, i) => (
-                        <TableRow key={i} className={`border-b border-slate-700 ${i % 2 === 0 ? "bg-slate-800/50" : "bg-slate-800/30"} hover:bg-slate-700/50`}>
-                          <TableCell className="text-slate-300 text-xs sm:text-sm">{r.position}</TableCell>
-                          <TableCell className="text-white font-medium text-xs sm:text-sm whitespace-nowrap">{r.Athlete?.name}</TableCell>
-                          <TableCell className="text-right text-slate-300 font-mono text-xs sm:text-sm whitespace-nowrap">
-                            {r.finishTime?.toFixed(2) || "—"}
-                          </TableCell>
-                          <TableCell className="text-right text-slate-300 font-mono text-xs sm:text-sm whitespace-nowrap">
-                            {r.reactionTime?.toFixed(3) || "—"}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
+          <CardContent className="p-0 overflow-x-auto max-w-full">
+            <div className="min-w-0 w-full">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-slate-700/50 border-b border-slate-600">
+                    <TableHead className="text-slate-300 text-xs sm:text-sm w-12 sm:w-16">🏆 Pos</TableHead>
+                    <TableHead className="text-slate-300 text-xs sm:text-sm min-w-0">👤 Athlete</TableHead>
+                    <TableHead className="text-right text-slate-300 text-xs sm:text-sm w-16 sm:w-20">⏱️ Finish</TableHead>
+                    <TableHead className="text-right text-slate-300 text-xs sm:text-sm w-20 sm:w-24">⚡ Reaction</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {board.map((r, i) => (
+                    <TableRow key={i} className={`border-b border-slate-700 ${i % 2 === 0 ? "bg-slate-800/50" : "bg-slate-800/30"} hover:bg-slate-700/50`}>
+                      <TableCell className="text-slate-300 text-xs sm:text-sm w-12 sm:w-16">{r.position}</TableCell>
+                      <TableCell className="text-white font-medium text-xs sm:text-sm truncate min-w-0 max-w-[100px] sm:max-w-none">
+                        {r.Athlete?.name || "—"}
+                      </TableCell>
+                      <TableCell className="text-right text-slate-300 font-mono text-xs sm:text-sm w-16 sm:w-20">
+                        {r.finishTime?.toFixed(2) || "—"}
+                      </TableCell>
+                      <TableCell className="text-right text-slate-300 font-mono text-xs sm:text-sm w-20 sm:w-24">
+                        {r.reactionTime?.toFixed(3) || "—"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           </CardContent>
         </Card>
