@@ -426,6 +426,7 @@
 
 
 import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import Confetti from "react-confetti"; // ✅ ONLY NEW IMPORT
 
 import { initSocket } from "../../services/socket";
@@ -455,6 +456,9 @@ function LiveBadge() {
 }
 
 export default function LiveLeaderboard() {
+  const [searchParams] = useSearchParams();
+  const eventIdFromUrl = searchParams.get("eventId");
+  
   const [board, setBoard] = useState([]);
   const [currentEvent, setCurrentEvent] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -481,11 +485,32 @@ export default function LiveLeaderboard() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Find the latest ongoing event
+  // Load event - either from URL parameter or find latest
   useEffect(() => {
-    async function findLatestEvent() {
+    async function loadEvent() {
       try {
-        // Fetch all events
+        setLoading(true);
+        
+        // If eventId is provided in URL, use that event
+        if (eventIdFromUrl) {
+          try {
+            const eventRes = await api.get(`/events/${eventIdFromUrl}`);
+            const event = eventRes.data.data || eventRes.data;
+            
+            if (event) {
+              setCurrentEvent(event);
+              // Fetch leaderboard for this event
+              const leaderboardRes = await api.get(`/results/leaderboard/${event.id}`);
+              setBoard(leaderboardRes.data.data || []);
+            }
+          } catch (err) {
+            console.error("Failed to fetch event:", err);
+          }
+          setLoading(false);
+          return;
+        }
+
+        // Otherwise, find the latest ongoing event
         const eventsRes = await api.get("/events");
         const events = eventsRes.data.data || eventsRes.data;
 
@@ -546,13 +571,13 @@ export default function LiveLeaderboard() {
 
         setLoading(false);
       } catch (err) {
-        console.error("Failed to find latest event:", err);
+        console.error("Failed to load event:", err);
         setLoading(false);
       }
     }
 
-    findLatestEvent();
-  }, []);
+    loadEvent();
+  }, [eventIdFromUrl]);
 
   // Set up socket connection for the current event
   useEffect(() => {

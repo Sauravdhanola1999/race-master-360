@@ -41,6 +41,10 @@ export default function AdminLayout() {
                 <span>📅</span>
                 Events
               </Link>
+              <Link to="/admin/heats" className={navLink("/admin/heats")}>
+                <span>🔥</span>
+                Heats
+              </Link>
               <Link to="/admin/results" className={navLink("/admin/results")}>
                 <span>🏆</span>
                 Results

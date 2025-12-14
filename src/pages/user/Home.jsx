@@ -133,7 +133,7 @@ export default function Home() {
                     </Button>
                   </Link>
 
-                  <Link to="/live">
+                  <Link to={`/live?eventId=${ev.id}`}>
                     <Button
                       size="sm"
                       className="bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg font-semibold"

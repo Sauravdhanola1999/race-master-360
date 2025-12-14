@@ -16,7 +16,8 @@ import { Badge } from "@/components/ui/badge";
 export default function ResultEntry() {
   const [events, setEvents] = useState([]);
   const [heats, setHeats] = useState([]);
-  const [athletes, setAthletes] = useState([]);
+  const [allAthletes, setAllAthletes] = useState([]); // Store all athletes
+  const [filteredAthletes, setFilteredAthletes] = useState([]); // Filtered by heat Results
 
   const [form, setForm] = useState({
     eventId: "",
@@ -36,7 +37,7 @@ export default function ResultEntry() {
 });
 
 
-  // Load events + athletes
+  // Load events + all athletes
   useEffect(() => {
     async function loadInitial() {
       const [evRes, atRes] = await Promise.all([
@@ -44,18 +45,58 @@ export default function ResultEntry() {
         api.get("/athletes"),
       ]);
       setEvents(evRes.data.data || evRes.data);
-      setAthletes(atRes.data.data || atRes.data);
+      setAllAthletes(atRes.data.data || atRes.data);
     }
     loadInitial();
   }, []);
 
   async function loadHeatsForEvent(eventId) {
-    setForm({ ...form, eventId, heatId: "" });
+    setForm({ ...form, eventId, heatId: "", athleteId: "" }); // Clear heat and athlete when event changes
+    setFilteredAthletes([]); // Clear filtered athletes
     if (!eventId) return;
 
     const res = await api.get(`/heats/event/${eventId}`);
     setHeats(res.data.data || res.data);
   }
+
+  // Filter athletes based on selected event and heat
+  useEffect(() => {
+    if (form.eventId && form.heatId && heats.length > 0) {
+      // Find the selected heat to get its Results array
+      const selectedHeat = heats.find(h => String(h.id) === form.heatId);
+      
+      let filtered = [];
+      
+      if (selectedHeat && selectedHeat.Results && selectedHeat.Results.length > 0) {
+        // Method 1: Use athleteIds from the heat's Results array
+        const athleteIds = selectedHeat.Results.map(result => result.athleteId);
+        filtered = allAthletes.filter(athlete => athleteIds.includes(athlete.id));
+      } else {
+        // Method 2: Fallback - filter by athlete's eventId and heatId properties
+        filtered = allAthletes.filter(
+          (athlete) =>
+            athlete.eventId === Number(form.eventId) &&
+            athlete.heatId === Number(form.heatId)
+        );
+      }
+      
+      setFilteredAthletes(filtered);
+      
+      // Clear athlete selection if current selection is not in filtered list
+      if (form.athleteId && !filtered.find(a => String(a.id) === form.athleteId)) {
+        setForm({ ...form, athleteId: "" });
+      }
+    } else {
+      setFilteredAthletes([]);
+    }
+  }, [form.eventId, form.heatId, heats, allAthletes]);
+
+  // Clear athlete when heat changes
+  useEffect(() => {
+    if (form.heatId) {
+      setForm((prev) => ({ ...prev, athleteId: "" }));
+    }
+  }, [form.heatId]);
 
   function validateForm() {
     const newErrors = {};
@@ -304,7 +345,7 @@ async function submit(e) {
             <Select
               value={form.heatId}
               onValueChange={(val) => {
-                setForm({ ...form, heatId: val });
+                setForm({ ...form, heatId: val, athleteId: "" }); // Clear athlete when heat changes
                 if (errors.heatId) setErrors({ ...errors, heatId: "" });
               }}
               disabled={!form.eventId}
@@ -350,12 +391,21 @@ async function submit(e) {
                     setForm({ ...form, athleteId: val });
                     if (errors.athleteId) setErrors({ ...errors, athleteId: "" });
                   }}
+                  disabled={!form.eventId || !form.heatId || filteredAthletes.length === 0}
                 >
                   <SelectTrigger className={errors.athleteId ? "border-red-500" : ""}>
-                    <SelectValue placeholder="Select Athlete" />
+                    <SelectValue 
+                      placeholder={
+                        !form.eventId || !form.heatId
+                          ? "Select Event & Heat first"
+                          : filteredAthletes.length === 0
+                          ? "No athletes in this heat"
+                          : "Select Athlete"
+                      } 
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    {athletes.map((a) => (
+                    {filteredAthletes.length > 0 && filteredAthletes.map((a) => (
                       <SelectItem key={a.id} value={String(a.id)}>
                         {a.name} ({a.country})
                       </SelectItem>
@@ -364,6 +414,11 @@ async function submit(e) {
                 </Select>
                 {errors.athleteId && (
                   <p className="text-xs text-red-400 mt-1">{errors.athleteId}</p>
+                )}
+                {form.eventId && form.heatId && filteredAthletes.length === 0 && (
+                  <p className="text-xs text-slate-400 mt-1">
+                    No athletes assigned to this event/heat. Add athletes in the Athletes page.
+                  </p>
                 )}
               </div>
 
