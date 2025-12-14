@@ -426,7 +426,6 @@
 
 
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import Confetti from "react-confetti"; // ✅ ONLY NEW IMPORT
 
 import { initSocket } from "../../services/socket";
@@ -456,8 +455,9 @@ function LiveBadge() {
 }
 
 export default function LiveLeaderboard() {
-  const { eventId } = useParams();
   const [board, setBoard] = useState([]);
+  const [currentEvent, setCurrentEvent] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [showConfetti, setShowConfetti] = useState(true);
 
   // ✅ CONFETTI SCREEN SIZE
@@ -481,19 +481,88 @@ export default function LiveLeaderboard() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Find the latest ongoing event
   useEffect(() => {
+    async function findLatestEvent() {
+      try {
+        // Fetch all events
+        const eventsRes = await api.get("/events");
+        const events = eventsRes.data.data || eventsRes.data;
+
+        if (!events || events.length === 0) {
+          setLoading(false);
+          return;
+        }
+
+        // Find event with the most recent results
+        let latestEvent = null;
+        let latestResultTime = null;
+
+        for (const event of events) {
+          try {
+            const leaderboardRes = await api.get(`/results/leaderboard/${event.id}`);
+            const results = leaderboardRes.data.data || [];
+
+            if (results.length > 0) {
+              // Find the most recent finish time in this event
+              const recentResult = results
+                .filter(r => r.finishTime)
+                .sort((a, b) => {
+                  // Sort by updatedAt if available, otherwise by finishTime
+                  const timeA = new Date(a.updatedAt || 0).getTime();
+                  const timeB = new Date(b.updatedAt || 0).getTime();
+                  return timeB - timeA;
+                })[0];
+
+              if (recentResult) {
+                const resultTime = new Date(recentResult.updatedAt || 0).getTime();
+                if (!latestResultTime || resultTime > latestResultTime) {
+                  latestResultTime = resultTime;
+                  latestEvent = event;
+                }
+              }
+            }
+          } catch (err) {
+            // Event has no results, skip it
+            continue;
+          }
+        }
+
+        // If no event with results found, use the most recently created/updated event
+        if (!latestEvent && events.length > 0) {
+          latestEvent = events.sort((a, b) => {
+            const timeA = new Date(a.updatedAt || a.createdAt || 0).getTime();
+            const timeB = new Date(b.updatedAt || b.createdAt || 0).getTime();
+            return timeB - timeA;
+          })[0];
+        }
+
+        if (latestEvent) {
+          setCurrentEvent(latestEvent);
+          // Fetch leaderboard for the latest event
+          const leaderboardRes = await api.get(`/results/leaderboard/${latestEvent.id}`);
+          setBoard(leaderboardRes.data.data || []);
+        }
+
+        setLoading(false);
+      } catch (err) {
+        console.error("Failed to find latest event:", err);
+        setLoading(false);
+      }
+    }
+
+    findLatestEvent();
+  }, []);
+
+  // Set up socket connection for the current event
+  useEffect(() => {
+    if (!currentEvent) return;
+
     let socket;
     async function init() {
-      try {
-        const res = await api.get(`/results/leaderboard/${eventId}`);
-        setBoard(res.data.data);
-      } catch (err) {
-        console.error("Failed to fetch leaderboard:", err);
-      }
-
       const token = localStorage.getItem("token");
       socket = initSocket(token);
-      socket.emit("joinLeaderboard", { eventId: String(eventId) });
+      socket.emit("joinLeaderboard", { eventId: String(currentEvent.id) });
 
       socket.on("leaderboard:update", (payload) => {
         setBoard(payload);
@@ -504,15 +573,44 @@ export default function LiveLeaderboard() {
 
     return () => {
       if (socket) {
-        socket.emit("leaveLeaderboard", { eventId: String(eventId) });
+        socket.emit("leaveLeaderboard", { eventId: String(currentEvent.id) });
         socket.off("leaderboard:update");
       }
     };
-  }, [eventId]);
+  }, [currentEvent]);
 
   const top3 = board.slice(0, 3);
   const winner = top3[0];
   const runnerUp = top3[1];
+
+  if (loading) {
+    return (
+      <div className="relative min-h-screen overflow-hidden track-field-bg flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4 animate-bounce">🏃</div>
+          <p className="text-xl text-white font-semibold">Loading latest live event...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentEvent || board.length === 0) {
+    return (
+      <div className="relative min-h-screen overflow-hidden track-field-bg">
+        <div className="relative z-10 max-w-6xl mx-auto px-6 py-12">
+          <Card className="border border-slate-700 bg-slate-800 shadow-lg">
+            <CardContent className="py-12 text-center">
+              <div className="text-6xl mb-4">📺</div>
+              <h2 className="text-2xl font-bold text-white mb-2">No Live Event</h2>
+              <p className="text-slate-400">
+                There are currently no ongoing events with live results.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen overflow-hidden track-field-bg">
@@ -574,9 +672,10 @@ export default function LiveLeaderboard() {
                   Live Leaderboard <LiveBadge />
                 </h1>
                 <p className="text-sm text-slate-400 mt-1 max-w-xl">
-                  📊 This leaderboard shows current race rankings based on official
-                  finish times. Results update automatically as officials enter
-                  data — no refresh required.
+                  📊 <span className="font-semibold text-white">{currentEvent.eventName}</span> - {currentEvent.category} ({currentEvent.distance}m)
+                </p>
+                <p className="text-xs text-slate-500 mt-1">
+                  Results update automatically as officials enter data — no refresh required.
                 </p>
               </div>
               <div className="text-sm text-green-400 font-medium">

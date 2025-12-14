@@ -112,7 +112,7 @@ export default function EventDetails() {
                     </div>
                   </div>
 
-                  <Link to={`/live/${event.id}`}>
+                  <Link to="/live">
                     <Button
                       size="sm"
                       className="bg-green-600 hover:bg-green-700 text-white font-semibold shadow-md"

@@ -118,17 +118,53 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errMsg, setErrMsg] = useState("");
+  const [errors, setErrors] = useState({});
 
   const navigate = useNavigate();
 
+  // Validation function matching backend rules
+  function validateForm() {
+    const newErrors = {};
+
+    // Email validation
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || trimmedEmail === "") {
+      newErrors.email = "Email is required";
+    } else {
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(trimmedEmail)) {
+        newErrors.email = "Invalid email address";
+      }
+    }
+
+    // Password validation
+    if (!password || password === "") {
+      newErrors.password = "Password is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }
+
   async function handleLogin(e) {
     e.preventDefault();
-    setLoading(true);
     setErrMsg("");
+    setErrors({});
+
+    // Validate form before submitting
+    if (!validateForm()) {
+      return;
+    }
+
+    setLoading(true);
 
     try {
+      // Normalize email (trim and lowercase)
+      const normalizedEmail = email.trim().toLowerCase();
+
       const res = await api.post("/auth/signin-admin", {
-        email,
+        email: normalizedEmail,
         password,
       });
 
@@ -138,7 +174,8 @@ export default function Login() {
       login(token);
       navigate("/admin");
     } catch (err) {
-      setErrMsg("Invalid email or password");
+      const errorMessage = err.response?.data?.message || "Invalid email or password";
+      setErrMsg(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -159,7 +196,6 @@ export default function Login() {
               <div className="p-2 bg-green-500/20 rounded-lg border border-green-500/30">
                 <span className="text-3xl">🔐</span>
               </div>
-              <span>🔐</span>
               Admin Login
             </CardTitle>
           </CardHeader>
@@ -177,32 +213,52 @@ export default function Login() {
               <div>
                 <Label className="text-sm font-medium text-slate-300 mb-2 block flex items-center gap-2">
                   <span>📧</span>
-                  Email
+                  Email <span className="text-red-400">*</span>
                 </Label>
                 <Input
                   type="email"
                   placeholder="admin@example.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus:border-green-500 focus:ring-green-500"
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (errors.email) setErrors({ ...errors, email: "" });
+                  }}
+                  className={`bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus:border-green-500 focus:ring-green-500 ${
+                    errors.email ? "border-red-500" : ""
+                  }`}
                 />
+                {errors.email && (
+                  <p className="text-xs text-red-400 mt-1 flex items-center gap-1">
+                    <span>⚠️</span>
+                    {errors.email}
+                  </p>
+                )}
               </div>
 
               {/* Password */}
               <div>
                 <Label className="text-sm font-medium text-slate-300 mb-2 block flex items-center gap-2">
                   <span>🔒</span>
-                  Password
+                  Password <span className="text-red-400">*</span>
                 </Label>
                 <Input
                   type="password"
                   placeholder="••••••••"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus:border-green-500 focus:ring-green-500"
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (errors.password) setErrors({ ...errors, password: "" });
+                  }}
+                  className={`bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus:border-green-500 focus:ring-green-500 ${
+                    errors.password ? "border-red-500" : ""
+                  }`}
                 />
+                {errors.password && (
+                  <p className="text-xs text-red-400 mt-1 flex items-center gap-1">
+                    <span>⚠️</span>
+                    {errors.password}
+                  </p>
+                )}
               </div>
 
               {/* Submit */}

@@ -57,7 +57,7 @@ export default function Header() {
           </Link>
 
           <Link 
-            to="/live/1" 
+            to="/live" 
             className={cn(
               "px-4 py-2 rounded-lg text-sm font-medium transition-all text-slate-300 flex items-center gap-2",
               location.pathname.startsWith("/live") 

@@ -26,7 +26,9 @@ export default function ResultEntry() {
     reactionTime: "",
     finishTime: "",
     status: "OK",
+    position: "",
   });
+  const [errors, setErrors] = useState({});
   const [popup, setPopup] = useState({
   open: false,
   message: "",
@@ -55,20 +57,121 @@ export default function ResultEntry() {
     setHeats(res.data.data || res.data);
   }
 
+  function validateForm() {
+    const newErrors = {};
+
+    // EventId validation (required)
+    if (!form.eventId || form.eventId === "") {
+      newErrors.eventId = "Event is required";
+    } else {
+      const eventIdNum = Number(form.eventId);
+      if (!Number.isInteger(eventIdNum) || eventIdNum < 1) {
+        newErrors.eventId = "Event ID must be a positive integer";
+      }
+    }
+
+    // HeatId validation (required)
+    if (!form.heatId || form.heatId === "") {
+      newErrors.heatId = "Heat is required";
+    } else {
+      const heatIdNum = Number(form.heatId);
+      if (!Number.isInteger(heatIdNum) || heatIdNum < 1) {
+        newErrors.heatId = "Heat ID must be a positive integer";
+      }
+    }
+
+    // AthleteId validation (required)
+    if (!form.athleteId || form.athleteId === "") {
+      newErrors.athleteId = "Athlete is required";
+    } else {
+      const athleteIdNum = Number(form.athleteId);
+      if (!Number.isInteger(athleteIdNum) || athleteIdNum < 1) {
+        newErrors.athleteId = "Athlete ID must be a positive integer";
+      }
+    }
+
+    // Lane validation (optional, 1-10)
+    if (form.lane && form.lane !== "") {
+      const laneNum = Number(form.lane);
+      if (!Number.isInteger(laneNum) || laneNum < 1 || laneNum > 10) {
+        newErrors.lane = "Lane must be between 1 and 10";
+      }
+    }
+
+    // ReactionTime validation (optional, >= 0)
+    if (form.reactionTime && form.reactionTime !== "") {
+      const reactionNum = parseFloat(form.reactionTime);
+      if (isNaN(reactionNum) || reactionNum < 0) {
+        newErrors.reactionTime = "Reaction time must be >= 0";
+      }
+    }
+
+    // FinishTime validation (optional, >= 0, but required when status is OK)
+    if (form.finishTime && form.finishTime !== "") {
+      const finishNum = parseFloat(form.finishTime);
+      if (isNaN(finishNum) || finishNum < 0) {
+        newErrors.finishTime = "Finish time must be >= 0";
+      }
+    }
+
+    // Status validation (optional, must be one of valid values)
+    if (form.status && form.status !== "") {
+      const validStatuses = ["OK", "DNS", "DNF", "DSQ"];
+      if (!validStatuses.includes(form.status)) {
+        newErrors.status = "Invalid status";
+      }
+    }
+    
+    // If status is OK, finishTime is required (matching backend validation)
+    if (form.status === "OK" && (!form.finishTime || form.finishTime === "")) {
+      newErrors.finishTime = "Finish time is required when status is OK";
+    }
+
+    // Position validation (optional, >= 1)
+    if (form.position && form.position !== "") {
+      const positionNum = Number(form.position);
+      if (!Number.isInteger(positionNum) || positionNum < 1) {
+        newErrors.position = "Position must be a positive integer";
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }
+
 async function submit(e) {
   e.preventDefault();
 
+  if (!validateForm()) {
+    return;
+  }
+
+  // Build payload with only optional fields (matching backend validation)
+  const payload = {};
+
+  // Add optional fields only if provided
+  if (form.lane && form.lane !== "") {
+    payload.lane = Number(form.lane);
+  }
+  if (form.reactionTime && form.reactionTime !== "") {
+    payload.reactionTime = parseFloat(form.reactionTime);
+  }
+  if (form.finishTime && form.finishTime !== "") {
+    payload.finishTime = parseFloat(form.finishTime);
+  }
+  if (form.status && form.status !== "") {
+    payload.status = form.status;
+  }
+  if (form.position && form.position !== "") {
+    payload.position = Number(form.position);
+  }
+
   try {
-    await api.post("/results", {
-      heatId: form.heatId,
-      athleteId: form.athleteId,
-      lane: Number(form.lane),
-      reactionTime: parseFloat(form.reactionTime || 0),
-      finishTime: form.finishTime
-        ? parseFloat(form.finishTime)
-        : null,
-      status: form.status,
-    });
+    // Use the new endpoint: PUT /results/event/:eventId/heat/:heatId/athlete/:athleteId
+    await api.put(
+      `/results/event/${form.eventId}/heat/${form.heatId}/athlete/${form.athleteId}`,
+      payload
+    );
 
     setPopup({
       open: true,
@@ -76,26 +179,32 @@ async function submit(e) {
       type: "success",
     });
 
-    // optional: reset some fields
+    // optional: reset some fields (keep event, heat, and athlete selection)
     setForm({
       ...form,
-      athleteId: "",
       lane: 1,
       reactionTime: "",
       finishTime: "",
       status: "OK",
+      position: "",
     });
+    setErrors({});
 
     // auto close
     setTimeout(() => {
       setPopup({ open: false, message: "", type: "success" });
     }, 2000);
   } catch (err) {
+    const errorMsg =
+      err.response?.data?.message || "Failed to save result";
     setPopup({
       open: true,
-      message: "Failed to save result",
+      message: errorMsg,
       type: "error",
     });
+    setTimeout(() => {
+      setPopup({ open: false, message: "", type: "success" });
+    }, 3000);
   }
 }
 
@@ -161,45 +270,65 @@ async function submit(e) {
           <CardTitle>Select Event & Heat</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Select
-            value={form.eventId}
-            onValueChange={(val) => loadHeatsForEvent(val)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select Event" />
-            </SelectTrigger>
-            <SelectContent>
-              {events.map((ev) => (
-                <SelectItem key={ev.id} value={String(ev.id)}>
-                  {ev.eventName}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div>
+            <label className="text-sm font-medium">
+              Event <span className="text-red-400">*</span>
+            </label>
+            <Select
+              value={form.eventId}
+              onValueChange={(val) => {
+                loadHeatsForEvent(val);
+                if (errors.eventId) setErrors({ ...errors, eventId: "" });
+              }}
+            >
+              <SelectTrigger className={errors.eventId ? "border-red-500" : ""}>
+                <SelectValue placeholder="Select Event" />
+              </SelectTrigger>
+              <SelectContent>
+                {events.map((ev) => (
+                  <SelectItem key={ev.id} value={String(ev.id)}>
+                    {ev.eventName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.eventId && (
+              <p className="text-xs text-red-400 mt-1">{errors.eventId}</p>
+            )}
+          </div>
 
-          <Select
-            value={form.heatId}
-            onValueChange={(val) =>
-              setForm({ ...form, heatId: val })
-            }
-            disabled={!form.eventId}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select Heat" />
-            </SelectTrigger>
-            <SelectContent>
-              {heats.map((h) => (
-                <SelectItem key={h.id} value={String(h.id)}>
-                  Heat {h.heatNumber} ({h.round})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div>
+            <label className="text-sm font-medium">
+              Heat <span className="text-red-400">*</span>
+            </label>
+            <Select
+              value={form.heatId}
+              onValueChange={(val) => {
+                setForm({ ...form, heatId: val });
+                if (errors.heatId) setErrors({ ...errors, heatId: "" });
+              }}
+              disabled={!form.eventId}
+            >
+              <SelectTrigger className={errors.heatId ? "border-red-500" : ""}>
+                <SelectValue placeholder="Select Heat" />
+              </SelectTrigger>
+              <SelectContent>
+                {heats.map((h) => (
+                  <SelectItem key={h.id} value={String(h.id)}>
+                    Heat {h.heatNumber} ({h.round})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.heatId && (
+              <p className="text-xs text-red-400 mt-1">{errors.heatId}</p>
+            )}
+          </div>
         </CardContent>
       </Card>
 
       {/* RESULT FORM */}
-      {form.heatId && (
+      {form.eventId && form.heatId && (
         <Card className="border border-slate-200 shadow-sm">
           <CardHeader>
             <CardTitle>Enter Result</CardTitle>
@@ -208,18 +337,21 @@ async function submit(e) {
           <CardContent>
             <form
               onSubmit={submit}
-              className="grid grid-cols-1 md:grid-cols-6 gap-4"
+              className="grid grid-cols-1 md:grid-cols-3 gap-4"
             >
               {/* Athlete */}
-              <div className="md:col-span-2">
-                <label className="text-sm font-medium">Athlete</label>
+              <div>
+                <label className="text-sm font-medium">
+                  Athlete <span className="text-red-400">*</span>
+                </label>
                 <Select
                   value={form.athleteId}
-                  onValueChange={(val) =>
-                    setForm({ ...form, athleteId: val })
-                  }
+                  onValueChange={(val) => {
+                    setForm({ ...form, athleteId: val });
+                    if (errors.athleteId) setErrors({ ...errors, athleteId: "" });
+                  }}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={errors.athleteId ? "border-red-500" : ""}>
                     <SelectValue placeholder="Select Athlete" />
                   </SelectTrigger>
                   <SelectContent>
@@ -230,54 +362,97 @@ async function submit(e) {
                     ))}
                   </SelectContent>
                 </Select>
+                {errors.athleteId && (
+                  <p className="text-xs text-red-400 mt-1">{errors.athleteId}</p>
+                )}
               </div>
 
               {/* Lane */}
               <div>
-                <label className="text-sm font-medium">Lane</label>
+                <label className="text-sm font-medium">Lane (Optional)</label>
                 <Input
                   type="number"
+                  min="1"
+                  max="10"
                   value={form.lane}
-                  onChange={(e) =>
-                    setForm({ ...form, lane: e.target.value })
-                  }
+                  onChange={(e) => {
+                    setForm({ ...form, lane: e.target.value });
+                    if (errors.lane) setErrors({ ...errors, lane: "" });
+                  }}
+                  className={errors.lane ? "border-red-500" : ""}
                 />
+                {errors.lane && (
+                  <p className="text-xs text-red-400 mt-1">{errors.lane}</p>
+                )}
               </div>
 
               {/* Reaction */}
               <div>
-                <label className="text-sm font-medium">Reaction (s)</label>
+                <label className="text-sm font-medium">Reaction (s) (Optional)</label>
                 <Input
+                  type="number"
+                  step="0.001"
+                  min="0"
                   placeholder="0.135"
                   value={form.reactionTime}
-                  onChange={(e) =>
-                    setForm({ ...form, reactionTime: e.target.value })
-                  }
+                  onChange={(e) => {
+                    setForm({ ...form, reactionTime: e.target.value });
+                    if (errors.reactionTime) setErrors({ ...errors, reactionTime: "" });
+                  }}
+                  className={errors.reactionTime ? "border-red-500" : ""}
                 />
+                {errors.reactionTime && (
+                  <p className="text-xs text-red-400 mt-1">{errors.reactionTime}</p>
+                )}
               </div>
 
               {/* Finish */}
               <div>
-                <label className="text-sm font-medium">Finish (s)</label>
+                <label className="text-sm font-medium">
+                  Finish (s) {form.status === "OK" ? <span className="text-red-400">*</span> : <span className="text-slate-400">(Optional)</span>}
+                </label>
                 <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
                   placeholder="9.58"
                   value={form.finishTime}
-                  onChange={(e) =>
-                    setForm({ ...form, finishTime: e.target.value })
-                  }
+                  onChange={(e) => {
+                    setForm({ ...form, finishTime: e.target.value });
+                    if (errors.finishTime) setErrors({ ...errors, finishTime: "" });
+                    if (errors.status) setErrors({ ...errors, status: "" });
+                  }}
+                  className={errors.finishTime ? "border-red-500" : ""}
                 />
+                {errors.finishTime && (
+                  <p className="text-xs text-red-400 mt-1">{errors.finishTime}</p>
+                )}
+                {form.status === "OK" && (
+                  <p className="text-xs text-slate-400 mt-1">
+                    Required when status is OK
+                  </p>
+                )}
               </div>
 
               {/* Status */}
               <div>
-                <label className="text-sm font-medium">Status</label>
+                <label className="text-sm font-medium">Status (Optional)</label>
                 <Select
                   value={form.status}
-                  onValueChange={(val) =>
-                    setForm({ ...form, status: val })
-                  }
+                  onValueChange={(val) => {
+                    setForm({ ...form, status: val });
+                    if (errors.status) setErrors({ ...errors, status: "" });
+                    // Clear finishTime error if status changes from OK
+                    if (val !== "OK" && errors.finishTime && errors.finishTime.includes("required when status is OK")) {
+                      setErrors({ ...errors, finishTime: "" });
+                    }
+                    // Validate finishTime if status is set to OK
+                    if (val === "OK" && (!form.finishTime || form.finishTime === "")) {
+                      setErrors({ ...errors, finishTime: "Finish time is required when status is OK" });
+                    }
+                  }}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={errors.status ? "border-red-500" : ""}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -289,10 +464,32 @@ async function submit(e) {
                     <SelectItem value="DSQ">DSQ</SelectItem>
                   </SelectContent>
                 </Select>
+                {errors.status && (
+                  <p className="text-xs text-red-400 mt-1">{errors.status}</p>
+                )}
+              </div>
+
+              {/* Position */}
+              <div>
+                <label className="text-sm font-medium">Position (Optional)</label>
+                <Input
+                  type="number"
+                  min="1"
+                  placeholder="1"
+                  value={form.position}
+                  onChange={(e) => {
+                    setForm({ ...form, position: e.target.value });
+                    if (errors.position) setErrors({ ...errors, position: "" });
+                  }}
+                  className={errors.position ? "border-red-500" : ""}
+                />
+                {errors.position && (
+                  <p className="text-xs text-red-400 mt-1">{errors.position}</p>
+                )}
               </div>
 
               {/* Submit */}
-              <div className="flex items-end">
+              <div className="flex items-end md:col-span-3">
                 <Button className="bg-indigo-600 hover:bg-indigo-700">
                   Save Result
                 </Button>

@@ -102,19 +102,24 @@ export default function Athletes() {
     }
 
     // Age validation
-    const ageNum = Number(form.age);
-    if (!form.age || form.age === "") {
-      newErrors.age = "Age is required";
-    } else if (!Number.isInteger(ageNum)) {
-      newErrors.age = "Age must be a number";
-    } else if (isEdit) {
-      // For update: age must be >= 1
-      if (ageNum < 1) {
-        newErrors.age = "Age must be at least 1";
+    if (isEdit) {
+      // For update: age is optional but if provided must be between 10 and 60
+      if (form.age && form.age !== "") {
+        const ageNum = Number(form.age);
+        if (!Number.isInteger(ageNum)) {
+          newErrors.age = "Age must be a number";
+        } else if (ageNum < 10 || ageNum > 60) {
+          newErrors.age = "Age must be between 10 and 60";
+        }
       }
     } else {
-      // For create: age must be between 10 and 60
-      if (ageNum < 10 || ageNum > 60) {
+      // For create: age is required and must be between 10 and 60
+      const ageNum = Number(form.age);
+      if (!form.age || form.age === "") {
+        newErrors.age = "Age is required";
+      } else if (!Number.isInteger(ageNum)) {
+        newErrors.age = "Age must be a number";
+      } else if (ageNum < 10 || ageNum > 60) {
         newErrors.age = "Age must be between 10 and 60";
       }
     }
@@ -142,11 +147,32 @@ export default function Athletes() {
 
     // Event and Heat validation (required for creation only)
     if (!isEdit) {
+      // EventId validation
       if (!form.eventId || form.eventId === "") {
-        newErrors.eventId = "Event is required";
+        newErrors.eventId = "Event ID is required";
+      } else {
+        const eventIdNum = Number(form.eventId);
+        if (!Number.isInteger(eventIdNum) || eventIdNum < 1) {
+          newErrors.eventId = "Event ID must be a positive integer";
+        }
       }
+      
+      // HeatId validation
       if (!form.heatId || form.heatId === "") {
-        newErrors.heatId = "Heat is required";
+        newErrors.heatId = "Heat ID is required";
+      } else {
+        const heatIdNum = Number(form.heatId);
+        if (!Number.isInteger(heatIdNum) || heatIdNum < 1) {
+          newErrors.heatId = "Heat ID must be a positive integer";
+        }
+      }
+      
+      // Lane validation (optional)
+      if (form.lane && form.lane !== "") {
+        const laneNum = Number(form.lane);
+        if (!Number.isInteger(laneNum) || laneNum < 1 || laneNum > 10) {
+          newErrors.lane = "Lane must be between 1 and 10";
+        }
       }
     }
 

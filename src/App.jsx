@@ -20,7 +20,7 @@ export default function App(){
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/event/:id" element={<EventDetails />} />
-          <Route path="/live/:eventId" element={<LiveLeaderboard />} />
+          <Route path="/live" element={<LiveLeaderboard />} />
 
            <Route path="/login" element={<Login />} /> 
 

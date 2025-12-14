@@ -39,24 +39,54 @@ export default function Events() {
   function validateForm(isUpdate = false) {
     const newErrors = {};
 
-    // Event Name validation
-    if (!form.eventName || form.eventName.trim() === "") {
-      newErrors.eventName = "Event name is required";
-    }
+    if (isUpdate) {
+      // For update: all fields are optional, but if provided must meet validation
+      
+      // Event Name validation (optional for update)
+      if (form.eventName !== undefined && form.eventName !== null) {
+        if (form.eventName.trim() === "") {
+          newErrors.eventName = "Event name cannot be empty";
+        }
+      }
 
-    // Category validation
-    if (!form.category || form.category.trim() === "") {
-      newErrors.category = "Category is required";
-    }
+      // Category validation (optional for update)
+      if (form.category !== undefined && form.category !== null) {
+        if (form.category.trim() === "") {
+          newErrors.category = "Category cannot be empty";
+        }
+      }
 
-    // Distance validation
-    const distanceNum = Number(form.distance);
-    if (!form.distance || form.distance === "") {
-      newErrors.distance = "Distance is required";
-    } else if (!Number.isInteger(distanceNum)) {
-      newErrors.distance = "Distance must be a whole number";
-    } else if (distanceNum < 50) {
-      newErrors.distance = "Distance must be >= 50m";
+      // Distance validation (optional for update)
+      if (form.distance !== undefined && form.distance !== null && form.distance !== "") {
+        const distanceNum = Number(form.distance);
+        if (!Number.isInteger(distanceNum)) {
+          newErrors.distance = "Distance must be a whole number";
+        } else if (distanceNum < 50) {
+          newErrors.distance = "Distance must be >= 50m";
+        }
+      }
+    } else {
+      // For create: all fields are required
+      
+      // Event Name validation
+      if (!form.eventName || form.eventName.trim() === "") {
+        newErrors.eventName = "Event name is required";
+      }
+
+      // Category validation
+      if (!form.category || form.category.trim() === "") {
+        newErrors.category = "Category is required";
+      }
+
+      // Distance validation
+      const distanceNum = Number(form.distance);
+      if (!form.distance || form.distance === "") {
+        newErrors.distance = "Distance is required";
+      } else if (!Number.isInteger(distanceNum)) {
+        newErrors.distance = "Distance must be a whole number";
+      } else if (distanceNum < 50) {
+        newErrors.distance = "Distance must be >= 50m";
+      }
     }
 
     setErrors(newErrors);
@@ -131,11 +161,18 @@ export default function Events() {
       return;
     }
 
-    const payload = {
-      eventName: form.eventName.trim(),
-      category: form.category,
-      distance: Number(form.distance),
-    };
+    const payload = {};
+    
+    // Only include fields that are provided
+    if (form.eventName !== undefined && form.eventName !== null && form.eventName.trim() !== "") {
+      payload.eventName = form.eventName.trim();
+    }
+    if (form.category !== undefined && form.category !== null && form.category.trim() !== "") {
+      payload.category = form.category;
+    }
+    if (form.distance !== undefined && form.distance !== null && form.distance !== "") {
+      payload.distance = Number(form.distance);
+    }
 
     try {
       await api.put(`/events/${editingId}`, payload);
