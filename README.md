@@ -1,228 +1,243 @@
-# 🏃 Athletics Scoreboard System
+Athletics Scoreboard System
 
-A full-stack **Athletics Tournament Management & Live Scoreboard System** designed to manage athletes, events, heats, and race results while delivering a **real-time live leaderboard experience** similar to professional sports broadcasts.
+A full-stack Athletics Tournament Management & Live Scoreboard System designed to manage athletes, events, heats, and race results while delivering a real-time live leaderboard experience, similar to professional sports broadcasts.
 
-This system enables administrators to manage competitions efficiently and allows viewers to track results live without refreshing the page.
+The system allows administrators to manage competitions efficiently while viewers can track results live without refreshing the page.
 
----
+🚀 Key Features
+👤 Admin Features
 
-## 🚀 Key Features
+Add and manage athletes
 
-### 👤 Admin Features
+Create athletics events (e.g., 100m, 200m)
 
-* Add and manage athletes
-* Create athletics events (e.g., 100m, 200m)
-* Organize multiple heats per event
-* Enter official race results
-* Automatic ranking and position calculation
-* Real-time leaderboard updates
-* Toast notifications for successful actions and errors
+Organize multiple heats per event
 
----
+Enter official race results
 
-### 👥 Viewer / User Features
+Automatic ranking and position calculation
 
-* View upcoming and live events
-* Watch **real-time leaderboards**
-* See winner, runner-up, and podium standings
-* Sports-broadcast-style UI experience
+Real-time leaderboard updates
 
----
+Toast notifications for success and error handling
 
-## 🏗️ System Modules
+👥 Viewer / User Features
 
-### 1️⃣ Athlete Management
+View upcoming and live events
 
-* Register athletes with:
+Watch real-time leaderboards
 
-  * Name
-  * Country
-  * Age
-  * Gender
-* Centralized athlete database
-* Clean and intuitive admin form
-* Success and error notifications
+See winner, runner-up, and podium standings
 
----
+Sports-broadcast-style UI experience
 
-### 2️⃣ Event Management
+🏗️ System Modules
+1️⃣ Athlete Management
 
-* Create athletics events with:
+Register athletes with:
 
-  * Event name (e.g., 100m Sprint)
-  * Distance (in meters)
-  * Category (Men / Women / U18)
-* Events act as the **parent structure** for heats and results
+Name
 
----
+Country
 
-### 3️⃣ Heat Management
+Age
 
-* Each event can have multiple heats
-* Athletes are assigned to specific heats
-* Mirrors **real-world athletics competition formats**
-* Handles large athlete participation efficiently
+Gender
 
----
+Centralized athlete database
 
-### 4️⃣ Results Management
+Clean and intuitive admin form
 
-* Admin enters:
+Success and error notifications
 
-  * Finish time
-  * Reaction time (optional)
-* The system automatically:
+2️⃣ Event Management
 
-  * Calculates athlete positions
-  * Sorts rankings
-  * Updates the live leaderboard
+Create athletics events with:
 
----
+Event name (e.g., 100m Sprint)
 
-### 5️ Live Leaderboard
+Distance (in meters)
 
-* Displays:
+Category (Men / Women / U18)
 
-  * 🥇 Winner
-  * 🥈 Runner-up
-  * 🥉 Third place
-* Sports-style scrolling headline ticker
-* Updates instantly using WebSockets
-* No manual refresh required
+Events act as the parent structure for heats and results
 
----
+3️⃣ Heat Management
 
-## ⚙️ Ranking Logic
+Each event can have multiple heats
 
-* Athletes are ranked based on **finish time**
-* Fastest time → Position 1
-* Tie-breakers can be extended (e.g., reaction time)
-* Rankings recalculate automatically after result entry
+Athletes are assigned to specific heats
 
----
+Mirrors real-world athletics competition formats
 
-##  UI / UX Highlights
+Efficient handling of large athlete participation
 
-* Sports-themed modern UI
-* Podium-style winner display
-* Live update indicators
-* Smooth animations and transitions
-* Glassmorphism card design
-* Fully responsive layout
+4️⃣ Results Management
 
----
+Admin enters:
 
-##  Notifications
+Finish time
 
-* Toast notifications for:
+Reaction time (optional)
 
-  * Successful athlete creation
-  * Successful result submission
-  * Validation or server errors
-* Non-blocking UX (no alerts or page reloads)
+The system automatically:
 
+Calculates athlete positions
 
+Sorts rankings
 
-##  Tech Stack
+Updates the live leaderboard
 
-### Frontend
+5️⃣ Live Leaderboard
 
-* React
-* Tailwind CSS
-* shadcn/ui
-* Socket.IO Client
+Displays:
 
-### Backend
+🥇 Winner
 
-* Node.js
-* Express.js
-* Sequelize ORM
-* REST APIs
-* Socket.IO (WebSockets)
+🥈 Runner-up
 
-### Database
+🥉 Third place
 
-* MySQL / PostgreSQL (via Sequelize)
+Sports-style scrolling headline ticker
 
+Updates instantly using WebSockets
 
+No manual refresh required
 
-##  Real-Time Data Flow
+⚙️ Ranking Logic
 
-1. Admin enters race results
-2. Backend processes rankings
-3. WebSocket broadcasts updates
-4. All connected clients receive instant updates
+Athletes are ranked based on finish time
 
+Fastest time → Position 1
 
+Tie-breakers can be extended (e.g., reaction time)
 
-##  Competition Model 
+Rankings recalculate automatically after result entry
 
-### 🟦 What is an Event?
+🎨 UI / UX Highlights
 
-An **Event** represents the type of race.
+Sports-themed modern UI
 
-**Examples:**
+Podium-style winner display
 
-* 100m Sprint (Men)
-* 200m Race (Women)
+Live update indicators
 
-👉 Defines *what* race is being conducted.
+Smooth animations and transitions
 
+Glassmorphism card design
 
+Fully responsive layout
 
-### 🟧 What is a Heat?
+🔔 Notifications
+
+Toast notifications for:
+
+Successful athlete creation
+
+Successful result submission
+
+Validation or server errors
+
+Non-blocking UX (no alerts or page reloads)
+
+🧰 Tech Stack
+Frontend
+
+React
+
+Tailwind CSS
+
+shadcn/ui
+
+Socket.IO Client
+
+Backend
+
+Node.js
+
+Express.js
+
+Sequelize ORM
+
+REST APIs
+
+Socket.IO (WebSockets)
+
+Database
+
+MySQL / PostgreSQL (via Sequelize)
+
+🔄 Real-Time Data Flow
+
+Admin enters race results
+
+Backend processes rankings
+
+WebSocket broadcasts updates
+
+All connected clients receive instant updates
+
+🏟️ Competition Model
+🟦 Event
+
+An Event represents the type of race.
+
+Examples:
+
+100m Sprint (Men)
+
+200m Race (Women)
+
+Defines what race is being conducted.
+
+🟧 Heat
 
 A Heat is a smaller group of athletes competing within an event.
 
-**Why heats are needed:**
+Why heats are needed:
 
-* Too many athletes can’t race at once
-* Tracks have limited lanes
-* Matches real athletics competition standards
+Track lane limitations
 
-**Example:**
+Large athlete participation
 
-* Event: 100m Sprint
+Real-world athletics standards
 
-  * Heat 1: 8 athletes
-  * Heat 2: 8 athletes
+Example:
 
-👉 Athletes compete **within heats**, not all together.
+Event: 100m Sprint
 
+Heat 1: 8 athletes
 
+Heat 2: 8 athletes
 
-### 🟩 What are Results?
+Athletes compete within heats, not all together.
 
-**Results** are the official race timings entered after a heat finishes.
+🟩 Results
+
+Results are the official race timings entered after a heat finishes.
 
 Each result includes:
 
-* Athlete
-* Finish time
-* Position
+Athlete
 
-👉 Results determine the final rankings.
+Finish time
 
+Position
 
+Results determine final rankings.
 
-## 🏆 Ranking Summary
+🏆 Ranking Summary
 
-* Fastest athlete → 🥇 Winner
-* Second fastest → 🥈 Runner-up
-* Third fastest → 🥉 Third place
-* Rankings are calculated automatically by the system
+Fastest athlete → 🥇 Winner
 
+Second fastest → 🥈 Runner-up
 
+Third fastest → 🥉 Third place
 
-## ⚡ Live Leaderboard Experience
+Rankings calculated automatically
 
-* Updates instantly when results are entered
-* No page refresh required
-* Displays:
+//commands 
 
-  * Winner
-  * Runner-up
-  * Full rankings
-
-
-
+cd frontend
+npm install
+npm run dev
