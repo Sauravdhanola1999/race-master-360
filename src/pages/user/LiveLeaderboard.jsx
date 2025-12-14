@@ -211,7 +211,7 @@ export default function LiveLeaderboard() {
   }
 
   return (
-    <div className="relative min-h-screen  track-field-bg">
+    <div>
 
       {/* 🎆 CONFETTI (3 seconds only) */}
       {showConfetti && (
